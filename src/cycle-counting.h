@@ -2,6 +2,8 @@
 #define __CYCLE_COUNTING_INCLUDED__
 
 /* ==========================================
+    Quick & Dirty cycle counting...
+
     START_CYCLE_COUNT() e STOP_CYCLE_COUNT()
 
     são usadas para contar a quantidade de ciclos
