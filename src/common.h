@@ -17,7 +17,7 @@
 #define TEST_BITS(x,bits) ((MASK_BITS((x),(bits))) != 0)
 
 /* NEW() e DELETE() C++ style for C (be careful!) */
-#define NEW(type, n) ( (type *)malloc(sizeof(type)*(n)) )
+#define NEW(type, n) malloc(sizeof(type)*(n))
 #define DELETE(p) { free((p)); }
 
 #endif
