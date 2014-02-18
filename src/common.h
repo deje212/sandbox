@@ -7,4 +7,7 @@
    um 'warning'. */
 #define UNUSED_PARAM(x) { (x) = (x); }
 
+/* Macete: Obtem o número de itens de um array. */
+#define ARRAY_ITEMS(array) ( sizeof((array)) / sizeof(&(array)[0]) )
+
 #endif
