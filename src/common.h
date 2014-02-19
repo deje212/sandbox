@@ -37,4 +37,7 @@
 #define COMPARE(x,y) (((x) > (y)) - ((x) < (y)))
 #define SIGN(x) COMPARE((x), 0)
 
+/* Em ponto-flutuante, NaN (Not A Number) não é igual a outro NaN! */
+#define IS_NAN((x)) ((x) != (x))
+
 #endif

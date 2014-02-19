@@ -19,6 +19,14 @@
 
       // Neste ponto 'cycles' conterá a 
       // quantidade de ciclos gastos por f().
+
+    É conveniente compilar o código com a
+    opção -O0, já que podemos ter alguns
+    problemas com as macros com código otimizado.
+
+    Para resolver isso, compile a função sob
+    teste em um módulo separado, com a opção
+    -O3, e o módulo testador com -O0.
    ========================================== */
 
 #include <x86intrin.h>
