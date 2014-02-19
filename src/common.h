@@ -20,4 +20,12 @@
 #define NEW(type, n) malloc(sizeof(type)*(n))
 #define DELETE(p) { free((p)); }
 
+/* COMPARE returns 1 for "greater than", -1 for "lesser than" and 0 for "equal".
+
+   WARNING: COMPARE is dangerous!
+   I think the C language specification states that any value different from zero
+   is TRUE. The macro supposes that TRUE is 1. */
+#define COMPARE(x,y) (((x) > (y)) - ((x) < (y)))
+#define SIGN(x) COMPARE((x), 0)
+
 #endif
