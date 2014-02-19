@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef union {
   float f;
@@ -25,4 +26,16 @@ int compare_floats2(float x, float y)
   }
 
   return abs(((f32_t *)&x)->i - ((f32_t *)&y)->i) <= 1;
+}
+
+int main(int argc, char **argv)
+{
+  float x = 67329.234;
+  float y = 67329.242;
+
+  printf("(%g == %g) = %s\n",
+    x, y,
+    compare_floats2(x,y) ? "true" : "false");
+
+  return 0;
 }
