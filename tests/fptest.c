@@ -1,5 +1,10 @@
 #include <float.h>
 #include <stdio.h>
+#include <values.h>
+
+#ifndef FLT_EPSILON
+#error "FLT_EPSILON not defined!"
+#endif
 
 /* Imprimindo a variável contendo o menor valor comparável a zero */
 int main(void)
@@ -19,6 +24,7 @@ int main(void)
     } while ( feps1 > 1.0f);
 
     printf("A máquina pensa que '%-10.10g' é igual a zero\n", feps);
+    printf("FLT_EPSILON = %g\n", FLT_EPSILON);
 
     return 0;
 }
