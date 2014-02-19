@@ -16,15 +16,24 @@
 #define MASK_BITS(x,bits) ((x) & (bits))
 #define TEST_BITS(x,bits) ((MASK_BITS((x),(bits))) != 0)
 
-/* NEW() e DELETE() C++ style for C (be careful!) */
+/* NEW() e DELETE() C style.
+
+	 WARNING: Cuidado com a passagem de parametros para essas macros! */
 #define NEW(type, n) malloc(sizeof(type)*(n))
 #define DELETE(p) { free((p)); }
 
-/* COMPARE returns 1 for "greater than", -1 for "lesser than" and 0 for "equal".
+/* COMPARE returna 1 para "maior que", -1 para "menor que" e 0 para "igual a".
 
-   WARNING: COMPARE is dangerous!
-   I think the C language specification states that any value different from zero
-   is TRUE. The macro supposes that TRUE is 1. */
+   WARNING: Usar essas macros pode ser perigoso!
+	 Acho que a especificação da linguagem C dita que qualquer valor diferente
+   de zero é TRUE. As macros abaixo supõem que TRUE é 1.
+
+	 Na arquitetura Intel (x86 e x86_64) isso parece ser verdadeiro, já que
+   o compilador tende a zerar um resitrador e usar a instrução "set al,1"
+   para denotar TRUE. 
+
+	 Está dado o aviso! */
+
 #define COMPARE(x,y) (((x) > (y)) - ((x) < (y)))
 #define SIGN(x) COMPARE((x), 0)
 
