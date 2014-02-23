@@ -18,7 +18,6 @@
 
 #define _CHAR_RND(x)  _RND_UPPER_BITS((x),sizeof(char))
 #define _SHORT_RND(x) _RND_UPPER_BITS((x),sizeof(short))
-#define _INT_RND(x)   _RND_UPPER_BITS((x),sizeof(int))
 
 int read_random_array(void *data, size_t size);
 
