@@ -37,9 +37,9 @@
 /* __cpuid() é chamada porque ela "limpa" as linhas de cache. */
 
 #define START_CYCLE_COUNT(x) { \
-  int a, b, c, d; \
+  int __a, __b, __c, __d; \
 \
-  __cpuid(0, a, b, c, d); \
+  __cpuid(0, __a, __b, __c, __d); \
   (x) = _rdtsc(); \
 }
 
