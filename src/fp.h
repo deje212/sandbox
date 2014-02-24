@@ -12,7 +12,9 @@
 #define IS_DFP_EQUAL_ABS(x,y) (fabs((x) - (y)) < DBL_EPSILON)
 
 /* Em comparações de igualdade entre valores "pequenos" (entre 0.0 e 1.0)
-   a caomparação "relativa" é mais eficaz. */
+   a caomparação "relativa" é mais eficaz. 
+
+   Isso pode falhar com comparações com zero! Use ULPs. */
 #define IS_SFP_EQUAL_REL(x,y) ((fabs((x) - (y)) < max(fabs((x)), fabs((y))) * FLT_EPSILON)
 #define IS_DFP_EQUAL_REL(x,y) ((fabs((x) - (y)) < max(fabs((x)), fabs((y))) * DBL_EPSILON)
 
@@ -24,7 +26,7 @@ typedef union {
 		unsigned int mantissa:23;
 		unsigned int expoent:8;
 		unsigned int sign:1;
-	} s;
+	}; /* unamed */
 } sfp_t;
 
 /* typedef para união que permite "desmantelar" o tipo "double". */
@@ -35,7 +37,7 @@ typedef union {
 		unsigned long long mantissa:53;
 		unsigned int expoent:10;
 		unsigned int sign:1;
-	} s;
+	}; /* unamed */
 } dfp_t;
 
 /* Comparações via UPLs */
