@@ -34,8 +34,8 @@ typedef union {
 	double d;
 	int64_t i64;
 	struct {
-		unsigned long long mantissa:53;
-		unsigned int expoent:10;
+		unsigned long long mantissa:52;
+		unsigned int expoent:11;
 		unsigned int sign:1;
 	}; /* unamed */
 } dfp_t;
