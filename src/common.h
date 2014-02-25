@@ -1,6 +1,7 @@
 #ifndef __COMMON_INCLUDED__
 #define __COMMON_INCLUDED__
 
+#include <math.h>
 #include <malloc.h>
 
 /* Macete: Caso uma função tenha parâmetros e
@@ -36,5 +37,9 @@
 
 #define COMPARE(x,y) (((x) > (y)) - ((x) < (y)))
 #define SIGN(x) COMPARE((x), 0)
+
+/* Macros para converter entre radianos e graus. */
+#define DEG2RAD(x) ((M_PI * (x)) / 180.0)
+#define RAD2DEG(x) ((180.0 * (x)) / M_PI)
 
 #endif
