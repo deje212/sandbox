@@ -1,0 +1,8 @@
+#!/bin/bash
+
+[[ $# -ne 1 ]] && {
+  echo "Usage: audio2mp3 <audiofile-name>";
+  exit 3;
+}
+
+ffmpeg -y -i "$1" -vn -ab 128k "$(echo "$1" | sed 's/\.[^.]*$/.mp3/')" && rm "$1"

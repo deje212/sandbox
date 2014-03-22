@@ -1,0 +1,19 @@
+#!/bin/bash
+
+[[ $# -ne 1 ]] && {
+	echo "Usage: showcodecs <filename>";
+	exit 3;
+}
+
+vc=$(ffmpeg -i "$1" 2>&1 | grep "Video:" | awk '{ print $4 }')
+ac=$(ffmpeg -i "$1" 2>&1 | grep "Audio:" | awk '{ print $4 }' | sed 's/,//')
+
+# Show codecs as comments to make possible to use this output
+# to create an script calling vid2mp4, this way:
+#
+#  $ echo '#!/bin/bash' > convert; \
+#    find -name \*.mp4 -exec showcodecs "{}" \; | grep -v ac3 | sed 's/^/vid2mp4 /' >> convert; \
+#    chmod +x convert; \
+#    ./convert && rm convert
+#
+echo "\"$1\" #($vc,$ac)"
