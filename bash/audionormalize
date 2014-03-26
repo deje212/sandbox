@@ -9,7 +9,7 @@
   exit 3;
 }
 
-tmpaudio="$(echo "$1" | sed 's/\.[^.]*$/._tmp_.mp3/')"
+tmpaudio="$(mktemp /tmp/tmp.XXXXXXXXXX.mp3)"
 tmpvideo="$(echo "$1" | sed 's/\.\([^.]*\)$/._tmp_.\1/')"
 videomap="$(ffmpeg -i "$1" 2>&1 | grep "Stream" | grep "Video:" | cut -c5- | cut -d" " -f2 | cut -c2-4)"
 

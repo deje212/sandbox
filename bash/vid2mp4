@@ -5,42 +5,48 @@
 	exit 3; 
 }
 
-vparams=""
-aparams=""
-extra_params="-map_metadata -1" # Retira metadados do vídeo destino.
+EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
 # Usa preset do x264 com maior poder de análise.
-vparams="-c:v libx264 -crf 18 -preset veryslow"
+VPARAMS="-c:v libx264 -crf 18 -preset veryslow"
 
 # Usa tunning film ou animation. "film" é default, se o último parâmetro 
 # não for informado.
 if [ $# -eq 2 ]; then
   case $2 in
-    (film) vparams="$vparams -tune film";;
-    (animation) vparams="$vparams -tune animation";;
+    (film) VPARAMS="$VPARAMS -tune film";;
+    (animation) VPARAMS="$VPARAMS -tune animation";;
     (*) echo "ERROR: tunning parameter must be not given, \"film\" or \"animation\"."; 
         exit;;
   esac 
 else
-  vparams="$vparams -tune film"
+  VPARAMS="$VPARAMS -tune film"
 fi
 
-abr=$(ffmpeg -i "$1" 2>&1 | grep Audio: | sed 's/^.*, \([0-9]*\) kb\/s.*$/\1/');
-if [ $abr -le 64 ]; then abr=64; else
-if [ $abr -le 96 ]; then abr=96; else
-if [ $abr -le 128 ]; then abr=128; else
-if [ $abr -le 160 ]; then abr=160; else
-if [ $abr -le 192 ]; then abr=192; else
-if [ $abr -le 256 ]; then abr=256; else
-  abr=384;
+ABR=$(ffmpeg -i "$1" 2>&1 | grep Audio: | sed 's/^.*, \([0-9]*\) kb\/s.*$/\1/');
+if [ $ABR -le 64 ]; then ABR=64; else
+if [ $ABR -le 96 ]; then ABR=96; else
+if [ $ABR -le 128 ]; then ABR=128; else
+if [ $ABR -le 160 ]; then ABR=160; else
+if [ $ABR -le 192 ]; then ABR=192; else
+if [ $ABR -le 256 ]; then ABR=256; else
+  ABR=384;
 fi fi fi fi fi fi
 
-abr=$abr"k";
-aparams="-c:a ac3 -b:a $abr -ac 2"
+ABR=$ABR"k";
+APARAMS="-c:a ac3 -b:a $ABR -ac 2"
 
-tmpfname=$(echo "$1" | sed 's/\.[^.]*$/._tmp_.mp4/')
-ofname=$(echo "$1" | sed 's/\.[^.]*$/.mp4/')
+unset ABR
 
-ffmpeg -i "$1" $vparams $aparams $extra_params "$tmpfname" && \
+TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.mp4)"
+OFNAME=$(echo "$1" | sed 's/\.[^.]*$/.mp4/')
+
+ffmpeg -y -i "$1" $VPARAMS $APARAMS $EXTRA_PARAMS "$TMPFNAME" && \
   rm "$1" && \
-  mv "$tmpfname" "$ofname"
+  mv "$TMPFNAME" "$OFNAME"
+
+unset VPARAMS
+unset APARAMS
+unset EXTRA_PARAMS
+unset TMPFNAME
+unset OFNAME

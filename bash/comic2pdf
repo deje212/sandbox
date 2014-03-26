@@ -5,6 +5,8 @@
   exit 3;
 }
 
-PDF_NAME="$(echo "$1" | sed 's/^\(.*\)\.cb[zr]$/\1/').pdf"
+PDF_NAME="$(echo "$1" | sed 's/^\(.*\)\.[^.]*$/\1/').pdf"
 
 ebook-convert "$1" "$PDF_NAME" --dont-grayscale && rm "$1"
+
+unset PDF_NAME
