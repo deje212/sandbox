@@ -5,4 +5,4 @@
   exit 3;
 }
 
-ffmpeg -y -i "$1" -vn -b:a 128k "$(echo "$1" | sed 's/\.[^.]*$/.mp3/')" && rm "$1"
+ffmpeg -y -i "$1" -vn -b:a 128k "$(1%.*}.mp3" && rm "$1"

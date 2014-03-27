@@ -6,4 +6,5 @@
 }
 
 echo -e "Converting \"\e[1m$1\e[0m\" to PNG"
-convert "$1" "$(echo "$1" | sed 's/\.[^.]*$/.png/')" && rm "$1"
+
+convert "$1" "${1%.*}.png" && rm "$1"

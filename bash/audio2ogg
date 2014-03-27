@@ -16,4 +16,4 @@ abr="384";
 fi fi fi fi fi fi
 abr=$abr"k";
 
-ffmpeg -i "$1" -vn -c:a libvorbis -b:a $abr "$(echo "$1" | sed 's/\.[^.]*$/.ogg/')" && rm "$1"
+ffmpeg -i "$1" -vn -c:a libvorbis -b:a $abr "${1%.*}.ogg" && rm "$1"
