@@ -36,6 +36,8 @@ if [ $# -lt 1 ]; then
   exit
 fi
 
+trap "deleteTempFile" KILL TERM
+
 while [ ! -z "$1" ]; do
   TMPFILE=$(mktemp /tmp/tmp_XXXXXXXXX.mp4)
 
