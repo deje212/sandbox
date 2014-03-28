@@ -40,7 +40,7 @@ while [ ! -z "$1" ]; do
   TMPFILE=$(mktemp /tmp/tmp_XXXXXXXXX.mp4)
 
 	ffvideo "$1" "$TMPFILE" && \
-  	(rm "$1"; mv "$TMPFILE" "$1";)
+  	(rm "$1"; mv "$TMPFILE" "${1%.*}.mp4";)
 
   rm -f "$TMPFILE"
 
