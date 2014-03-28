@@ -24,6 +24,13 @@ ffvideo ()
              --percentage=0
 }
 
+deleteTempFile()
+{
+	if [ ! -z "$TMPFILE" ]; then
+		rm -f "$TMPFILE"
+  fi
+}
+
 if [ $# -lt 1 ]; then
   zenity --title="Error" --ext="No files selected" --error
   exit
