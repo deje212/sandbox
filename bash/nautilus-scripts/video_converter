@@ -11,19 +11,18 @@ FFMPEG_OPTIONS="-c:v libx264 -sameq -c:a ac3 -b:a 192k -ac 2 -map_metadata -1"
 #   $1 = original video
 #   $2 = new video
 ffvideo () {
-	local TOTAL_FRAMES=$(tcprobe -i "$1" 2>&1 | grep 'length:' | sed 's/^ *length: \([0-9]\+\) frames.*$/\1/')
+  local TOTAL_FRAMES=$(mediainfo '--Inform=Video;%FrameCount%' "$1")
 
   ffmpeg -y -i "$1" $FFMPEG_OPTIONS "$2" 2>&1 | \
-      awk -vRS="\r" '$1 ~ /frame/ \
-										{
-											gsub(/frame=/," "); \
-                      gsub(/fps=/," "); \
-                      gsub(/kB/," "); \
-											gsub(/time=/," "); \
-											gsub(/ \(/," ");
-										  print "\n#Converting video: '"$4 : $1"'.\\n\\nTotal Frames: \\t\t'$TOTAL_FRAMES'\\t\tCurrent Frame:\\t"$1"\\nFrame rate (s):\\t\t"$2"\\nTarget File size:\\t\t"int(($5/($1/'$TOTAL_FRAMES'))/1024)"."int(((($5/($1/'$TOTAL_FRAMES'))/1024)-int(($5/($1/'$TOTAL_FRAMES'))/1024))*10)"\\nTime Remaining:\\t\t"int((('$TOTAL_FRAMES'-$1)/$2)/3600)":"int((((('$TOTAL_FRAMES'-$1)/$2)/3600)-(int((('$TOTAL_FRAMES'-$1)/$2)/3600)))*60)":"int((((('$TOTAL_FRAMES'-$1)/$2)/60)-(int((('$TOTAL_FRAMES'-$1)/$2)/60)))*60)"\\n\nPercent complete :\\t"int(($1/'$TOTAL_FRAMES')*100) " %";print int(($1/'$TOTAL_FRAMES')*100);
-											fflush();
-										}' | \
+      awk -vRS="\r" \
+        '$1 ~ /^frame/ \
+         { \
+           gsub(/frame=/,""); \
+           percent=int(($1 / '$TOTAL_FRAMES')*100); \
+           print "#Converting '"'$1'"'.\\nTotal Frames: '$TOTAL_FRAMES'\\t\\tCurrent Frame:" $1 "\\n\\nPercent complete: " percent " %"; \
+           print percent; \
+           fflush(); \
+         }' | \
       zenity --progress \
              --auto-kill \
              --auto-close \
@@ -33,15 +32,20 @@ ffvideo () {
 }
 
 if [ $# -lt 1 ]; then
-  zenity --title="Error" --ext="No files selected" --error
+  zenity --error --text="No files selected"
+  exit
+fi
+
+if [ ! -f "$1" ]; then
+  zenity --error --text="File '$1' does not exist"
   exit
 fi
 
 while [ ! -z "$1" ]; do
   TMPFILE="$(mktemp $(dirname "$1")/tmp_XXXXXXXXX.mp4)"
 
-	ffvideo "$1" "$TMPFILE" && \
-  	(rm "$1"; mv "$TMPFILE" "${1%.*}.mp4";)
+  ffvideo "$1" "$TMPFILE" && \
+    (rm "$1"; mv "$TMPFILE" "${1%.*}.mp4";)
 
   shift
 done
