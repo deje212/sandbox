@@ -23,25 +23,16 @@ ffvideo () {
              --percentage=0
 }
 
-cleanup() {
-  rm -f "$TMPFILE"
-}
-
 if [ $# -lt 1 ]; then
   zenity --title="Error" --ext="No files selected" --error
   exit
 fi
 
-# Infelizmente SIGKILL não pode ser capturado!
-trap cleanup INT TERM
-
 while [ ! -z "$1" ]; do
-  TMPFILE=$(mktemp /tmp/tmp_XXXXXXXXX.mp4)
+  TMPFILE="$(mktemp $(dirname "$1")/tmp_XXXXXXXXX.mp4)"
 
 	ffvideo "$1" "$TMPFILE" && \
   	(rm "$1"; mv "$TMPFILE" "${1%.*}.mp4";)
-
-  cleanup
 
   shift
 done
