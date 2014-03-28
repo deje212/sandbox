@@ -15,7 +15,7 @@ ffvideo ()
 	local TOTAL_FRAMES=$(tcprobe -i "$1" 2>&1 | grep 'length:' | sed 's/^ *length: \([0-9]\+\) frames.*$/\1/')
 
   ffmpeg -y -i "$1" $FFMPEG_OPTIONS "$2" 2>&1 | \
-      awk -vRS="\r" '$1 ~ /frame/ {gsub(/frame=/," ");gsub(/fps=/," ");gsub(/kB/," ");gsub(/time=/," ");gsub(/ \(/," ");print "\n#Converting video: '"$4 : $1"'.\\n\\nTotal Frames: \\t\t'$TOTAL_FRAMES'\\t\tCurrent Frame:\\t"$1"\\nFrame rate (s):\\t"$2"\\nTarget File size:\\t"int(($5/($1/'$TOTAL_FRAMES'))/1024)"."int(((($5/($1/'$TOTAL_FRAMES'))/1024)-int(($5/($1/'$TOTAL_FRAMES'))/1024))*10)"\\nTime Remaining:\\t"int((('$TOTAL_FRAMES'-$1)/$2)/3600)":"int((((('$TOTAL_FRAMES'-$1)/$2)/3600)-(int((('$TOTAL_FRAMES'-$1)/$2)/3600)))*60)":"int((((('$TOTAL_FRAMES'-$1)/$2)/60)-(int((('$TOTAL_FRAMES'-$1)/$2)/60)))*60)"\\nPercent complete :\\t"int(($1/'$TOTAL_FRAMES')*100) " %";print int(($1/'$TOTAL_FRAMES')*100);fflush();}' | \
+      awk -vRS="\r" '$1 ~ /frame/ {gsub(/frame=/," ");gsub(/fps=/," ");gsub(/kB/," ");gsub(/time=/," ");gsub(/ \(/," ");print "\n#Converting video: '"$4 : $1"'.\\n\\nTotal Frames: \\t\t'$TOTAL_FRAMES'\\t\tCurrent Frame:\\t"$1"\\nFrame rate (s):\\t\t"$2"\\nTarget File size:\\t\t"int(($5/($1/'$TOTAL_FRAMES'))/1024)"."int(((($5/($1/'$TOTAL_FRAMES'))/1024)-int(($5/($1/'$TOTAL_FRAMES'))/1024))*10)"\\nTime Remaining:\\t\t"int((('$TOTAL_FRAMES'-$1)/$2)/3600)":"int((((('$TOTAL_FRAMES'-$1)/$2)/3600)-(int((('$TOTAL_FRAMES'-$1)/$2)/3600)))*60)":"int((((('$TOTAL_FRAMES'-$1)/$2)/60)-(int((('$TOTAL_FRAMES'-$1)/$2)/60)))*60)"\\nPercent complete :\\t"int(($1/'$TOTAL_FRAMES')*100) " %";print int(($1/'$TOTAL_FRAMES')*100);fflush();}' | \
       zenity --progress \
              --auto-kill \
              --auto-close \
@@ -34,6 +34,8 @@ while [ ! -z "$1" ]; do
 
 	ffvideo "$1" "$TMPFILE" && \
   	(rm "$1"; mv "$TMPFILE" "$1";)
+
+  rm -f "$TMPFILE"
 
   shift
 done
