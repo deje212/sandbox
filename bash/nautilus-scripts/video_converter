@@ -10,8 +10,7 @@ FFMPEG_OPTIONS="-c:v libx264 -sameq -c:a ac3 -b:a 192k -ac 2 -map_metadata -1"
 # Parameters:
 #   $1 = original video
 #   $2 = new video
-ffvideo ()
-{
+ffvideo () {
 	local TOTAL_FRAMES=$(tcprobe -i "$1" 2>&1 | grep 'length:' | sed 's/^ *length: \([0-9]\+\) frames.*$/\1/')
 
   ffmpeg -y -i "$1" $FFMPEG_OPTIONS "$2" 2>&1 | \
@@ -24,11 +23,8 @@ ffvideo ()
              --percentage=0
 }
 
-deleteTempFile()
-{
-	if [ ! -z "$TMPFILE" ]; then
-		rm -f "$TMPFILE"
-  fi
+cleanup() {
+  rm -f "$TMPFILE"
 }
 
 if [ $# -lt 1 ]; then
@@ -36,7 +32,8 @@ if [ $# -lt 1 ]; then
   exit
 fi
 
-trap "deleteTempFile" KILL TERM
+# Infelizmente SIGKILL não pode ser capturado!
+trap cleanup INT TERM
 
 while [ ! -z "$1" ]; do
   TMPFILE=$(mktemp /tmp/tmp_XXXXXXXXX.mp4)
@@ -44,7 +41,7 @@ while [ ! -z "$1" ]; do
 	ffvideo "$1" "$TMPFILE" && \
   	(rm "$1"; mv "$TMPFILE" "${1%.*}.mp4";)
 
-  rm -f "$TMPFILE"
+  cleanup
 
   shift
 done
