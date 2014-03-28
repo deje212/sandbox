@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#
+# Converte vídeo usando ffmpeg para o formato MP4 usando os codecs h264 e ac3.
+# Script para nautilus, mas pode ser usado manualmente.
+#
+
+FFMPEG_OPTIONS="-c:v libx264 -sameq -c:a ac3 -b:a 192k -ac 2 -map_metadata -1"
+
+# Parameters:
+#   $1 = original video
+#   $2 = new video
+ffvideo ()
+{
+	local TOTAL_FRAMES=$(tcprobe -i "$1" 2>&1 | grep 'length:' | sed 's/^ *length: \([0-9]\+\) frames.*$/\1/')
+
+  ffmpeg -y -i "$1" $FFMPEG_OPTIONS "$2" 2>&1 | \
+      awk -vRS="\r" '$1 ~ /frame/ {gsub(/frame=/," ");gsub(/fps=/," ");gsub(/kB/," ");gsub(/time=/," ");gsub(/ \(/," ");print "\n#Converting video: '"$4 : $1"'.\\n\\nTotal Frames: \\t\t'$TOTAL_FRAMES'\\t\tCurrent Frame:\\t"$1"\\nFrame rate (s):\\t"$2"\\nTarget File size:\\t"int(($5/($1/'$TOTAL_FRAMES'))/1024)"."int(((($5/($1/'$TOTAL_FRAMES'))/1024)-int(($5/($1/'$TOTAL_FRAMES'))/1024))*10)"\\nTime Remaining:\\t"int((('$TOTAL_FRAMES'-$1)/$2)/3600)":"int((((('$TOTAL_FRAMES'-$1)/$2)/3600)-(int((('$TOTAL_FRAMES'-$1)/$2)/3600)))*60)":"int((((('$TOTAL_FRAMES'-$1)/$2)/60)-(int((('$TOTAL_FRAMES'-$1)/$2)/60)))*60)"\\nPercent complete :\\t"int(($1/'$TOTAL_FRAMES')*100) " %";print int(($1/'$TOTAL_FRAMES')*100);fflush();}' | \
+      zenity --progress \
+             --auto-kill \
+             --auto-close \
+             --title="Converting..." \
+             --width=500 \
+             --percentage=0
+}
+
+if [ $# -lt 1 ]; then
+  zenity --title="Error" --ext="No files selected" --error
+  exit
+fi
+
+while [ ! -z "$1" ]; do
+  TMPFILE=$(mktemp /tmp/tmp_XXXXXXXXX.mp4)
+
+	ffvideo "$1" "$TMPFILE" && \
+  	(rm "$1"; mv "$TMPFILE" "$1";)
+
+  shift
+done
