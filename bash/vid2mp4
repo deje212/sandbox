@@ -39,7 +39,7 @@ APARAMS="-c:a ac3 -b:a $ABR -ac 2"
 unset ABR
 
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.mp4)"
-OFNAME="$(1%.*}.mp4"
+OFNAME="${1%.*}.mp4"
 
 ffmpeg -y -i "$1" $VPARAMS $APARAMS $EXTRA_PARAMS "$TMPFNAME" && \
   rm "$1" && \
@@ -50,3 +50,4 @@ unset APARAMS
 unset EXTRA_PARAMS
 unset TMPFNAME
 unset OFNAME
+
