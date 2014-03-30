@@ -5,6 +5,13 @@
 #include <malloc.h>
 #include <regex.h>
 
+#define MATCH(s)        ((s).rm_so >= 0)
+#define MATCH_LENGTH(s) ((s).rm_eo - (s).rm_so)
+#define COPY_SUBSTRING(d, s, len) { \
+  strncpy((d), (s), (len)); \
+  *((d) + (len)) = 0; \
+}
+
 typedef struct {
   unsigned addr;
   unsigned cidr;
@@ -38,25 +45,29 @@ int get_ip_and_cidr(char const * const addr, CIDR *cidr_ptr)
   }
 
   /* Allocate enough space for temporary string. */
-  if ((t = (char *)malloc(strlen(addr)+1)) == NULL)
+  t = strdup(addr);
+  if (t  == NULL)
   {
     perror("Cannot allocate temporary string");
     abort();
   }
 
   /* Convert IP octects matches. */
-  len = rm[1].rm_eo - rm[1].rm_so;
-  strncpy(t, addr+rm[1].rm_so, len); 
-  t[len] = 0;
-  matches[0] = atoi(t);
+  if (MATCH(rm[1]))
+  {
+    len = MATCH_LENGTH(rm[1]);
+    COPY_SUBSTRING(t, addr+rm[1].rm_so, len);
+    matches[0] = atoi(t);
+  }
+  else  
+    matches[0] = 0;
 
   for (i = 2; i <= 4; i++)
   {
-    len = rm[i].rm_eo - rm[i].rm_so - 1;
-    if (len > 0)
+    if (MATCH(rm[i]))
     {
-      strncpy(t, addr+rm[i].rm_so+1, len); 
-      t[len] = 0;
+      len = MATCH_LENGTH(rm[i]) - 1;
+      COPY_SUBSTRING(t, addr + rm[i].rm_so + 1, len);
       matches[i-1] = atoi(t);
     }
     else
@@ -64,11 +75,11 @@ int get_ip_and_cidr(char const * const addr, CIDR *cidr_ptr)
   }
 
   /* Convert cidr match. */
-  len = rm[5].rm_eo - rm[5].rm_so - 1;
-  if (len > 0)
+  if (MATCH(rm[5]))
   {
-    strncpy(t, addr+rm[5].rm_so+1, len); 
-    t[len] = 0;
+    len = MATCH_LENGTH(rm[5]) - 1;
+    COPY_SUBSTRING(t, addr + rm[5].rm_so + 1, len);
+
     if ((matches[4] = atoi(t)) == 0)
     {
       /* if cidr is actually '0', then it is an error! */
