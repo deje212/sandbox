@@ -28,7 +28,7 @@ trap "" INT
 
 echo "Recording... Press Ctrl+C to Stop."
 
-ffmpeg -f alsa -i hw:0 -ar 16000 -ac 1 -acodec flac "$TMP_FLAC" > /dev/null 2>&1
+ffmpeg -y -f alsa -i hw:0 -ar 16000 -ac 1 -acodec flac "$TMP_FLAC" > /dev/null 2>&1
 
 echo "Processing..."
 
