@@ -6,12 +6,9 @@
 # pede ao Google Translator para traduzí-la para inglês e "fala" a frase traduzida.
 # 
  
-# Poderíamos testar com:
-# [ "$(whereis ffmpeg | cut -d: -f2)" == "" ] { echo "can't find arecord"; exit; }
-
+# As aplicações necessárias existem e são executáveis?
 [ -x /usr/bin/wget ]    || ( echo "cant't find wget"; exit; )
 [ -x /usr/bin/ffmpeg ]  || ( echo "can't find ffmpeg"; exit; )
-[ -x /usr/bin/lynx ]    || ( echo "can't find lynx"; exit; )
 [ -x /usr/bin/mplayer ] || ( echo "can't find mplayer"; exit )
 
 FROM_LANG="pt"; FROM_LANG2="pt-br"
@@ -22,33 +19,38 @@ say() {
   mplayer -ao alsa -really-quiet -noconsolecontrols "http://translate.google.com/translate_tts?ie=UTF-8&tl=${TO_LANG}&q=$*" 2> /dev/null; 
 }
 
+ALSA_DEVICE="hw:0"
+SAMPLE_RATE=16000
 TMP_FLAC="$(mktemp /tmp/tmp_XXXXXXXXXXXX.flac)"
 
+# O script não será interrompido por Ctrl+C.
 trap "" INT
 
 echo "Recording... Press Ctrl+C to Stop."
 
-ffmpeg -y -f alsa -i hw:0 -ar 16000 -ac 1 -acodec flac "$TMP_FLAC" > /dev/null 2>&1
+ffmpeg -y -f alsa -i $ALSA_DEVICE -ar $SAMPLE_RATE -ac 1 -acodec flac "$TMP_FLAC" > /dev/null 2>&1
 
 echo "Processing..."
 
 FROM_PHRASE=`wget -q -U "Mozilla/5.0" \
      --post-file "$TMP_FLAC" \
-     --header "Content-Type: audio/x-flac; rate=16000" \
+     --header "Content-Type: audio/x-flac; rate=$SAMPLE_RATE" \
       -O - "http://www.google.com/speech-api/v1/recognize?lang=${FROM_LANG2}&client=chromium" | \
         cut -d\" -f12`
+
+# Não precisamos mais do arquivo de audio.
+rm -f $TMP_FLAC
 
 echo "You Said: $FROM_PHRASE"
 
 # Espaços são '+' na URL.
 FROM_PHRASE=`echo "$FROM_PHRASE" | sed 's/ /+/'g`
 
-TO_PHRASE=`lynx -source "http://translate.google.com?tr=${FROM_LANG}&hl=${TO_LANG}&text=$FROM_PHRASE" | \
+TO_PHRASE=`wget -q -U "Mozilla/5.0" -O - "http://translate.google.com?tr=${FROM_LANG}&hl=${TO_LANG}&text=$FROM_PHRASE" | \
   awk 'gsub("<[^/]", "\n&")' | 
   grep '<span title' | 
   cut -d"<" -f2 | cut -d">" -f2 | sed 's/ /+/'g`
 
 say "$TO_PHRASE"
 
-rm -f $TMP_FLAC
 
