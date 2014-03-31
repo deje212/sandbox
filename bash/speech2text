@@ -41,7 +41,7 @@ FROM_PHRASE=`wget -q -U "Mozilla/5.0" \
 echo "You Said: $FROM_PHRASE"
 
 # Espaços são '+' na URL.
-FROM_PHRASE=`echo "$PHRASE" | sed 's/ /+/'g`
+FROM_PHRASE=`echo "$FROM_PHRASE" | sed 's/ /+/'g`
 
 TO_PHRASE=`lynx -source "http://translate.google.com?tr=${FROM_LANG}&hl=${TO_LANG}&text=$FROM_PHRASE" | \
   awk 'gsub("<[^/]", "\n&")' | 
