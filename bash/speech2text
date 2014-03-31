@@ -9,15 +9,9 @@
 # As aplicações necessárias existem e são executáveis?
 [ -x /usr/bin/wget ]    || ( echo "cant't find wget"; exit; )
 [ -x /usr/bin/ffmpeg ]  || ( echo "can't find ffmpeg"; exit; )
-[ -x /usr/bin/mplayer ] || ( echo "can't find mplayer"; exit )
 
 FROM_LANG="pt"; FROM_LANG2="pt-br"
 TO_LANG="en"
-
-say() { 
-  local IFS=+;
-  mplayer -ao alsa -really-quiet -noconsolecontrols "http://translate.google.com/translate_tts?ie=UTF-8&tl=${TO_LANG}&q=$*" 2> /dev/null; 
-}
 
 ALSA_DEVICE="hw:0"
 SAMPLE_RATE=16000
@@ -51,6 +45,8 @@ TO_PHRASE=`wget -q -U "Mozilla/5.0" -O - "http://translate.google.com?tr=${FROM_
   grep '<span title' | 
   cut -d"<" -f2 | cut -d">" -f2 | sed 's/ /+/'g`
 
-say "$TO_PHRASE"
+# Just say it!
+wget -q -U "Mozilla/5.0" -O - "http://translate.google.com/translate_tts?ie=UTF-8&tl=${TO_LANG}&q=${TO_PHRASE}" | \
+  ffplay -autoexit -nodisp - > /dev/null 2>&1
 
 
