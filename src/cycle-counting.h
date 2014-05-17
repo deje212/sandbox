@@ -17,7 +17,7 @@
       f();
       STOP_CYCLE_COUNT(cycles);
 
-      // Neste ponto 'cycles' conterá a 
+      // Neste ponto 'cycles' conterá a
       // quantidade de ciclos gastos por f().
 
     É conveniente compilar o código com a
@@ -29,20 +29,38 @@
     -O3, e o módulo testador com -O0.
    ========================================== */
 
-#include <x86intrin.h>
-#include <cpuid.h>
+#define START_CYCLE_COUNT(x) \
+  { \
+    unsigned long lo, hi; \
+    \
+    __asm__ volatile ( \
+      "cpuid; \
+       rdtsc; \
+       rdtsc; \
+       rdtsc; \
+       rdtsc; \
+       rdtsc; \
+       rdtsc; \
+       rdtsc; \
+       rdtsc; \
+       rdtsc;" \
+      : "=a" (lo), "=d" (hi) : : "%rbx", "%rcx" \
+    ); \
+  \
+    (x) = ((unsigned long long)hi << 32) + lo; \
+  }
 
-/* NOTE: A "variável x" deve ser do tipo uint64_t e deve ser a mesma entre uso dos macros */
-
-/* __cpuid() é chamada porque ela "limpa" as linhas de cache. */
-
-#define START_CYCLE_COUNT(x) { \
-  int __a, __b, __c, __d; \
-\
-  __cpuid(0, __a, __b, __c, __d); \
-  (x) = _rdtsc(); \
-}
-
-#define STOP_CYCLE_COUNT(x) { (x) = _rdtsc() - (x); }
+/* From INTEL paper. */
+#define STOP_CYCLE_COUNT(x) \
+  { \
+    unsigned long lo, hi; \
+    \
+    __asm__ volatile ( \
+      "rdtscp;" \
+      : "=a" (lo), "=d" (hi) : : "%rcx" \
+    ); \
+  \
+    (x) = ((unsigned long long)hi << 32) + lo; \
+  }
 
 #endif
