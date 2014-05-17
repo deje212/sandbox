@@ -34,17 +34,16 @@
     unsigned long lo, hi; \
     \
     __asm__ volatile ( \
-      "cpuid; \
-       rdtsc; \
-       rdtsc; \
-       rdtsc; \
-       rdtsc; \
-       rdtsc; \
-       rdtsc; \
-       rdtsc; \
-       rdtsc; \
-       rdtsc;" \
-      : "=a" (lo), "=d" (hi) : : "%rbx", "%rcx" \
+      "rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp;" \
+      : "=a" (lo), "=d" (hi) : : "%rcx" \
     ); \
   \
     (x) = ((unsigned long long)hi << 32) + lo; \
