@@ -45,7 +45,7 @@
        rdtscp; \
        rdtscp; \
        rdtscp;" \
-      : "=a" (__lo), "=d" (__hi) : : "%rcx" \
+      : "=a" (__lo), "=d" (__hi) : : "%ecx" \
     ); \
   \
     (x) = ((unsigned long long)__hi << 32) + __lo; \
@@ -57,7 +57,7 @@
     \
     __asm__ volatile ( \
       "rdtscp;" \
-      : "=a" (__lo), "=d" (__hi) : : "%rcx" \
+      : "=a" (__lo), "=d" (__hi) : : "%ecx" \
     ); \
   \
     (x) = ((unsigned long long)__hi << 32) + __lo; \
