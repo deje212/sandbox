@@ -1,6 +1,5 @@
 #include <GL/glfw.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <setjmp.h>
@@ -29,14 +28,14 @@ int main(void)
   /* For now on, glfwPollEvents() must be explicitly called! */
   glfwDisable(GLFW_AUTO_POLL_EVENTS);
 
-  /* Using OpenGL 3.0 core profile! */
+  /* Using OpenGL 4.3 core profile! */
 
   /* if GLX_ARB_create_context extension is not available, then 
        setting OpenGL version is partially supported. 
      if GLX_ARB_create_context_profile is not available, then
        setting GLFW_OPENGL_CORE_PROFILE will cause glfwOpenWindow() to fail. */
-  glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
-  glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 0);
+  glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 4);
+  glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 3);
   if (glfwExtensionSupported("GLX_ARB_create_context_profile"))
     glfwOpenWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
