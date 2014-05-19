@@ -11,38 +11,56 @@
 
     Exemplo de uso:
 
-      uint64_t cycles;
+      uint64_t t1, t2;
 
-      START_CYCLE_COUNT(cycles);
+      START_CYCLE_COUNT(t1);
       f();
-      STOP_CYCLE_COUNT(cycles);
+      STOP_CYCLE_COUNT(t2);
 
-      // Neste ponto 'cycles' conterá a 
+      // Neste ponto (t2 - t1) conterá a
       // quantidade de ciclos gastos por f().
 
-    É conveniente compilar o código com a
-    opção -O0, já que podemos ter alguns
-    problemas com as macros com código otimizado.
+    É conveniente compilar o código sob teste com a
+    opção -O0, já que o compilador poderá 'sumir' com
+    o código, por causa da otimização.
 
-    Para resolver isso, compile a função sob
-    teste em um módulo separado, com a opção
-    -O3, e o módulo testador com -O0.
+    As macros, em si, não são "otimizáveis", por assim dizer.
    ========================================== */
 
-#include <x86intrin.h>
-#include <cpuid.h>
+/* Diversas instruções rdtscp para serialização e warmup. */
+/* Infelizmente o assembly inline do GCC não permite usar
+   a restrição "=A" para atualizar um 'unsigned long long'
+   de uma só vez! */
+#define START_CYCLE_COUNT(x) \
+  { \
+    unsigned long __lo, __hi; \
+    \
+    __asm__ volatile ( \
+      "rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp; \
+       rdtscp;" \
+      : "=a" (__lo), "=d" (__hi) : : "%ecx" \
+    ); \
+  \
+    (x) = ((unsigned long long)__hi << 32) + __lo; \
+  }
 
-/* NOTE: A "variável x" deve ser do tipo uint64_t e deve ser a mesma entre uso dos macros */
-
-/* __cpuid() é chamada porque ela "limpa" as linhas de cache. */
-
-#define START_CYCLE_COUNT(x) { \
-  int __a, __b, __c, __d; \
-\
-  __cpuid(0, __a, __b, __c, __d); \
-  (x) = _rdtsc(); \
-}
-
-#define STOP_CYCLE_COUNT(x) { (x) = _rdtsc() - (x); }
+#define STOP_CYCLE_COUNT(x) \
+  { \
+    unsigned long __lo, __hi; \
+    \
+    __asm__ volatile ( \
+      "rdtscp;" \
+      : "=a" (__lo), "=d" (__hi) : : "%ecx" \
+    ); \
+  \
+    (x) = ((unsigned long long)__hi << 32) + __lo; \
+  }
 
 #endif

@@ -1,6 +1,5 @@
 #include <GL/glfw.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <setjmp.h>
@@ -34,7 +33,6 @@ int main(void)
 
   /* O tratamento de eventos é feito "manualmente", daqui pra frente. */
   glfwDisable(GLFW_AUTO_POLL_EVENTS);
-
 
   /* Usando o core profile do OpenGL 3.0 (uma de minhas máquinas de teste só suporta a versão 3!) */
   glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
