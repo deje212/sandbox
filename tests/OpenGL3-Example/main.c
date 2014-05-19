@@ -8,46 +8,54 @@
 #define WINDOW_WIDTH  640
 #define WINDOW_HEIGHT 480
 
+// Macro usada para atribuir offsets aos Vertex Attribute Pointers.
 #define BUFFER_OFFSET(ofs) (NULL + (ofs))
 
+// "Handle" do programa contendo shaders.
 static unsigned int shaders_program;
 
 static void         InitOpenGL(void);
 static char        *LoadText(const char *filename);
-static void         LoadShaders(void);
+static int          LoadShaders(unsigned int *program);
 static unsigned int CreateVAO(void);
 static void         DrawVAO(int vao, size_t triangles);
 
 int main(void)
 {
+  /* *** INICIALIZAÇÃO do contexto gráfico usando GLFW 2 *** */
+  /* OBS: Por que não uso GLFW 3? Por que não está disponível, por default
+          nos repositórios do Debian ou Ubuntu! E já tive problemas ao compilar
+          o GLFW 3 para esses ambientes! */
   if (glfwInit() == GL_FALSE)
   {
     fprintf(stderr, "initializing graphics library");
     exit(EXIT_FAILURE);
   }
 
-  /* For now on, glfwPollEvents() must be explicitly called! */
+  /* O tratamento de eventos é feito "manualmente", daqui pra frente. */
   glfwDisable(GLFW_AUTO_POLL_EVENTS);
 
-  /* Using OpenGL 3.0 core profile! */
 
-  /* if GLX_ARB_create_context extension is not available, then 
-       setting OpenGL version is partially supported. 
-     if GLX_ARB_create_context_profile is not available, then
-       setting GLFW_OPENGL_CORE_PROFILE will cause glfwOpenWindow() to fail. */
+  /* Usando o core profile do OpenGL 3.0 (uma de minhas máquinas de teste só suporta a versão 3!) */
   glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
   glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 0);
+
+  /* Se a extensão GLX_ARB_create_context_profile não estiver disponível, então: 
+       ajustar o profile é parcialmente suportado e; 
+     Se GLX_ARB_create_context_profile não estiver disponível, então
+       usar GLFW_OPENGL_CORE_PROFILE fará glfwOpenWindow() falhar! */
   if (glfwExtensionSupported("GLX_ARB_create_context_profile"))
     glfwOpenWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  /* if GLX_ARB_multisample extension is not available, than this has no effect. */
+  /* Se a extensão GLX_ARB_multisample_extension não estiver disponível, então
+     ajustar GLFW_FSAA_SAMPLES não tem efeito. */
   glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 4);
 
-	/* Set FULLSCREEN MODE */
+	/* Cria a janela. */
 	if ( !glfwOpenWindow(WINDOW_WIDTH, WINDOW_HEIGHT,
-      								8, 8, 8, 8, /* rgba bits */
-                      24,         /* depth buffer bits */
-                      0,          /* stencil buffer bits */
+      								8, 8, 8, 8, /* rgba bits (8 para cada componente) */
+                      24,         /* depth buffer bits (prefiro 24, é mais seguro que seja suportado) */
+                      0,          /* Não vamos usar stencil buffer. */
                       GLFW_WINDOW) )
 	{
     glfwTerminate();
@@ -55,29 +63,35 @@ int main(void)
     exit(EXIT_FAILURE);
   }
 
-  // get version info
-  const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-  const GLubyte* version = glGetString(GL_VERSION); // version as a string
-  int major, minor, rev;
-  glfwGetGLVersion(&major, &minor, &rev);
-  printf ("Renderer: %s\n", renderer);
-  printf ("OpenGL version supported %s\n", version);
-  printf ("GLFW reports OpenGL version %d.%d.%d\n", major, minor, rev);
+// --- Isso está aqui só para eu saber com o que estou lidando.
+#ifdef DEBUG
+  {
+    // get version info
+    const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
+    const GLubyte* version = glGetString(GL_VERSION); // version as a string
+    int major, minor, rev;
+    glfwGetGLVersion(&major, &minor, &rev);
+    printf ("Renderer: %s\n", renderer);
+    printf ("OpenGL version supported %s\n", version);
+    printf ("GLFW reports OpenGL version %d.%d.%d\n", major, minor, rev);
+  }
+#endif
 
-  /* Make sure mouse cursor is invisible after initialization. */
+  /* Vamos sumir com o mouse. */
   glfwDisable(GLFW_MOUSE_CURSOR);
 
   InitOpenGL();
-  LoadShaders();
-  unsigned int vao = CreateVAO();
 
+  if (LoadShaders(&shaders_program) != 0)
+    exit(EXIT_FAILURE);
+  CreateVAO();
   glUseProgram(shaders_program);
 
   for (;;)
   {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    /* NOTE: VAO already bound here! */
+    /* NOTE: VAO já está "bound", neste ponto. */
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     glfwPollEvents();
@@ -88,7 +102,6 @@ int main(void)
     glfwSwapBuffers();
   }
   
-  // close GL context and any other GLFW resources
   glfwTerminate();
   return 0;
 }
@@ -104,13 +117,12 @@ static void InitOpenGL(void)
   glFrontFace(GL_CCW);
   glCullFace(GL_BACK);
 
-  // tell GL to only draw onto a pixel if the shape is closer to the viewer
-  glEnable (GL_DEPTH_TEST); // enable depth-testing
-  glDepthFunc (GL_LESS); // depth-testing interprets a smaller value as "closer"
-
-  // OBS: Matrices are deprecated on OpenGL 3.0+ core profile.
+  /* Liga o teste de profundidade. */
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
 }
 
+// Função auxiliar: Apenas lê um arquivo texto e o coloca num buffer. */
 static char *LoadText(const char *filename)
 {
   long filesize;
@@ -147,8 +159,8 @@ static char *LoadText(const char *filename)
   return buffer;
 }
 
-/* Load, compile and link shaders. */
-static void LoadShaders(void)
+/* Carrega, compila e linka os shaders. */
+static int LoadShaders(unsigned int *program)
 {
   char *vertex_shader; 
   char *fragment_shader;
@@ -157,7 +169,11 @@ static void LoadShaders(void)
   char log[256];
   unsigned int vs, fs;
 
-  vertex_shader = LoadText("simple.vert");
+  if ((vertex_shader = LoadText("simple.vert")) == NULL)
+  {
+    fprintf(stderr, "Erro carregando Vertex Shader.\n");
+    return -1;
+  }
   vs = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vs, 1, &vertex_shader, NULL);
   free(vertex_shader);
@@ -167,10 +183,14 @@ static void LoadShaders(void)
   {
     glGetShaderInfoLog(vs, sizeof(log)-1, &len, log);
     fprintf(stderr, "Error compiling vertex shader:\n\t%s\n", log);
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
-  fragment_shader = LoadText("simple.frag");
+  if ((fragment_shader = LoadText("simple.frag")) == NULL)
+  {
+    fprintf(stderr, "Erro carregando Fragment Shader.\n");
+    return -1;
+  }
   fs = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fs, 1, &fragment_shader, NULL);
   free(fragment_shader);
@@ -180,31 +200,33 @@ static void LoadShaders(void)
   {
     glGetShaderInfoLog(fs, sizeof(log)-1, &len, log);
     fprintf(stderr, "Error compiling fragment shader:\n\t%s\n", log);
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
-  shaders_program = glCreateProgram();
-  glAttachShader(shaders_program, vs);
-  glAttachShader(shaders_program, fs);
+  *program = glCreateProgram();
+  glAttachShader(*program, vs);
+  glAttachShader(*program, fs);
 
-  /* Need to be defined here! 
-     FIXME: GLSL 4+ use layout(location=n)... is this necessary then? */
-  glBindAttribLocation(shaders_program, 0, "vrtx"); /* VertexAttribPointer index 0 is vertex data. */
-  glBindAttribLocation(shaders_program, 1, "clr");  /* VertexAttribPointer index 1 is color data. */
+  /* Como GLSL 1.3 (do OpenGL 3.0) não tem "layout", nos shaders, então é preciso definir
+     a localização de variáveis globais dos shaders aqui. */
+  glBindAttribLocation(*program, 0, "vrtx"); /* vertex */
+  glBindAttribLocation(*program, 1, "clr");  /* color */
 
-  glLinkProgram(shaders_program);
-  glGetProgramiv(shaders_program, GL_LINK_STATUS, &status);
+  glLinkProgram(*program);
+  glGetProgramiv(*program, GL_LINK_STATUS, &status);
   if (!status)
   {
     glGetProgramInfoLog(vs, sizeof(log)-1, &len, log);
     fprintf(stderr, "Error linking shaders program:\n\t%s\n", log);
-    exit(EXIT_FAILURE);
+    return -1;
   }
+
+  return 0;
 }
 
 static unsigned int CreateVAO(void)
 {
-  /* array will disapear after the function returns. */
+  /* Esses arrays vão desaparecer no final da função. */
   float points[] = {
      0.0f,  0.5f, 0.0f,
     -0.5f, -0.5f, 0.0f,
@@ -219,25 +241,25 @@ static unsigned int CreateVAO(void)
 
   unsigned int vao, vbo[2];
 
-  // VAOs is a container of Buffer Objects and VertexAttribs.
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
+  // Cria 2 buffers objects. Um para conter os vértices e outro para as cores dos vértices. */
   glGenBuffers(2, vbo);
 
+  /* Carrega o vbo com os vertices e associa os atributos. */
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, BUFFER_OFFSET(0));
 
+  /* Carrega o vbo com as cores e associa os atributos. */
   glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 4, GL_FLOAT, 0, 0, BUFFER_OFFSET(0));
 
-  // Para teste (UnBind).
-  //glBindVertexArray(0);
-  //glBindBuffer(GL_ARRAY_BUFFER, 0);
+  /* NOTE: Ao sair, o VAO e os VBOs estarão "bounded". */
 
   return vao;
 }

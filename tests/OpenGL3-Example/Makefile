@@ -7,6 +7,7 @@ LDFLAGS=-O3 -lm -lGL -lglfw
 all: main
 
 main: main.o
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 main.o: main.c
 
