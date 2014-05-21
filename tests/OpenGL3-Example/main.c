@@ -68,7 +68,9 @@ int main(void)
     const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
     const GLubyte* version = glGetString(GL_VERSION); // version as a string
     int major, minor, rev;
+
     glfwGetGLVersion(&major, &minor, &rev);
+
     printf ("Renderer: %s\n", renderer);
     printf ("OpenGL version supported %s\n", version);
     printf ("GLFW reports OpenGL version %d.%d.%d\n", major, minor, rev);
@@ -90,7 +92,8 @@ int main(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     /* NOTE: VAO já está "bound", neste ponto. */
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 3); /* count é o número de vertices, não o de primitivos! 
+                                         GL_TRIANGLES só indica que o OpenGL ira desenhar triangulos! */
 
     glfwPollEvents();
 
@@ -109,8 +112,8 @@ static void InitOpenGL(void)
 {
   glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-  glClearColor(0, 0, 0, 1);
-  glClearDepth(1);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearDepth(1.0f);
   glEnable(GL_CULL_FACE);
   glFrontFace(GL_CCW);
   glCullFace(GL_BACK);
@@ -137,7 +140,8 @@ static char *LoadText(const char *filename)
     }
 
     fseek(fin, 0L, SEEK_END);
-    filesize = ftell(fin);
+    if ((filesize = ftell(fin)) <= 0)
+      longjmp(jb, 1);
     fseek(fin, 0L, SEEK_SET);
 
     if ((buffer = malloc(filesize+1)) == NULL)
@@ -174,7 +178,7 @@ static int LoadShaders(unsigned int *program)
   }
   vs = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vs, 1, &vertex_shader, NULL);
-  free(vertex_shader);
+  free(vertex_shader);  /* Não precisamos mais do texto carregado. */
   glCompileShader(vs);
   glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
   if (!status)
@@ -191,7 +195,7 @@ static int LoadShaders(unsigned int *program)
   }
   fs = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fs, 1, &fragment_shader, NULL);
-  free(fragment_shader);
+  free(fragment_shader);  /* Não precisamos mais do texto carregado. */
   glCompileShader(fs);
   glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
   if (!status)
@@ -257,7 +261,13 @@ static unsigned int CreateVAO(void)
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 4, GL_FLOAT, 0, 0, BUFFER_OFFSET(0));
 
-  /* NOTE: Ao sair, o VAO e os VBOs estarão "bounded". */
+  /* Neste ponto o Vertex Array Object contém as referências aos buffer objects e aos atributos de cada
+     buffer. Se fizessemos: glBindVertexArray(0), poderíamos recuperar todas as referências refazendo o
+     bind. Daí, é só chamar glDrawArrays para desenhar. 
+
+     Se não me engano, um Vertex Array também contém os binds de texturas. */
+
+  /* NOTE: Neste exemplo, ao sair, o VAO continuará "bounded". */
 
   return vao;
 }
