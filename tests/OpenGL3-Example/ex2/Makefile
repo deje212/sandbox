@@ -2,6 +2,7 @@ CC=gcc
 CFLAGS=-O3 -mtune=native -fomit-frame-pointer
 LIBS=-lm -lGL -lglfw
 
+.PHONY: all clean
 all: test
 
 test: test.o
