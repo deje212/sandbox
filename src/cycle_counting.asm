@@ -6,9 +6,7 @@ section .text
 global start_cycle_count:function
 start_cycle_count:
   push rcx
-  %rep 16       ; using 16 instructions for warm-up.
-    rdtscp
-  %endrep
+  times 16 rdtscp ; 16 rdtscp instructions for warm-up.
   shl rcx,32
   and rax,0xffffffff
   or  rax,rcx
