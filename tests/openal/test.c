@@ -1,4 +1,5 @@
 // Ainda não está funcionando.
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <AL/al.h>
@@ -12,12 +13,19 @@ int main(int argc, char *argv[])
   ALuint source;
   ALuint buffer;
   ALboolean enumeration;
-  ALsizei size, freq;
-  ALenum format;
   ALenum source_state;
-  ALvoid *data;
-  ALboolean loop = AL_FALSE;
   ALfloat listenerOrientation[] = { 0, 0, 1, 0, 1, 0 };
+  ALfloat positions[] = { 0, 0, 10,
+                          0, 0, -10,
+                          10, 0, 0,
+                         -10, 0, 0 };
+  int i;
+
+  if (alutInit(&argc, argv) == AL_FALSE)
+  {
+    fprintf(stderr, "Error initializing ALUT.\n");
+    return 1;
+  }
 
   if ((device = alcOpenDevice(NULL)) == NULL)
   {
@@ -30,7 +38,7 @@ int main(int argc, char *argv[])
     printf("Device Specifiers: %s\n", alcGetString(NULL, ALC_DEVICE_SPECIFIER));
 
   context = alcCreateContext(device, NULL);
-  if (!context && !alcMakeContextCurrent(context))
+  if ((context == NULL) || (alcMakeContextCurrent(context) == AL_FALSE))
   {
     fprintf(stderr, "Erro ajustando contexto.\n");
     alcCloseDevice(device);
@@ -38,34 +46,38 @@ int main(int argc, char *argv[])
   }
 
   // Ajusta o listener.
-  alListener3f(AL_POSITION, 0, 0, 1);
-  alListener3f(AL_VELOCITY, 0, 0, 0);
+  alListener3f(AL_POSITION, 0, 0, 0);
   alListenerfv(AL_ORIENTATION, listenerOrientation);
 
   // Ajusta source.
   alGenSources(1, &source);
-  alSourcef(source, AL_PITCH, 1);
-  alSourcef(source, AL_GAIN, 1);
-  alSource3f(source, AL_POSITION, 0, 0, 0);
-  alSource3f(source, AL_VELOCITY, 0, 0, 0);
-  alSourcef(source, AL_LOOPING, AL_FALSE);
-
-  // Cria o buffer.
-  alGenBuffers(1, &buffer);
 
   // Carrega wave (deprecated).
-  alutLoadWAVFile("./wilhelm.wav", &format, &data, &size, &freq, &loop);
-  alBufferData(buffer, format, data, size, freq);
+  if ((buffer = alutCreateBufferFromFile("./wilhelm.wav")) == 0)
+  {
+    alcMakeContextCurrent(NULL);
+    alcCloseDevice(device);
+    fprintf(stderr, "Error creating buffer.\n");
+    return 1;
+  }
 
   // Liga buffer ao source.
   alSourcei(source, AL_BUFFER, buffer);
 
-  alSourcePlay(source);
+  /* Tenta tocar nas 4 posições. */
+  for (i = 0; i < 4; i++)
+  {
+    alSourcefv(source, AL_POSITION, &positions[3*i]);
 
-  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
-  // check for errors
-  while (source_state == AL_PLAYING)
+    alSourcePlay(source);
+
     alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+    // check for errors
+    while (source_state == AL_PLAYING)
+      alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+
+    sleep(1);
+  }
 
   alDeleteSources(1, &source);
   alDeleteBuffers(1, &buffer);
