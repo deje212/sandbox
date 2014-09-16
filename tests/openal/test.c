@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
   ALuint buffer;
   ALboolean enumeration;
   ALenum source_state;
-  ALfloat listenerOrientation[] = { 0, 0, 1, 0, 1, 0 };
+  ALfloat listenerOrientation[] = { 0, 0, -1, 0, 1, 0 };
   ALfloat positions[] = { 0, 0, 10,
                           0, 0, -10,
                           10, 0, 0,
@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
   // Carrega wave (deprecated).
   if ((buffer = alutCreateBufferFromFile("./wilhelm.wav")) == 0)
   {
+    alDeleteSources(1, &source);
     alcMakeContextCurrent(NULL);
     alcCloseDevice(device);
     fprintf(stderr, "Error creating buffer.\n");
@@ -67,6 +68,9 @@ int main(int argc, char *argv[])
   /* Tenta tocar nas 4 posições. */
   for (i = 0; i < 4; i++)
   {
+    printf("Playing sample at position (%.1f, %.1f, %.1f)\n",
+      positions[3*i], positions[3*i+1], positions[3*i+2]);
+
     alSourcefv(source, AL_POSITION, &positions[3*i]);
 
     alSourcePlay(source);
@@ -79,8 +83,9 @@ int main(int argc, char *argv[])
     sleep(1);
   }
 
-  alDeleteSources(1, &source);
+  alSourcei(source, AL_BUFFER, 0);
   alDeleteBuffers(1, &buffer);
+  alDeleteSources(1, &source);
   alcMakeContextCurrent(NULL);
   alcDestroyContext(context);
   alcCloseDevice(device);
