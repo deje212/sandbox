@@ -15,10 +15,10 @@ int main(int argc, char *argv[])
   ALboolean enumeration;
   ALenum source_state;
   ALfloat listenerOrientation[] = { 0, 0, -1, 0, 1, 0 };
-  ALfloat positions[] = { 0, 0, 10,
-                          0, 0, -10,
-                          10, 0, 0,
-                         -10, 0, 0 };
+  ALfloat positions[] = { 0, 0, 1,
+                          0, 0, -1,
+                          1, 0, 0,
+                         -1, 0, 0 };
   int i;
 
   if (alutInit(&argc, argv) == AL_FALSE)
