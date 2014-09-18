@@ -12,7 +12,6 @@ int main(int argc, char *argv[])
   ALCcontext *context;
   ALuint source;
   ALuint buffer;
-  ALboolean enumeration;
   ALenum source_state;
   ALfloat listenerOrientation[] = { 0, 0, -1, 0, 1, 0 };
   ALfloat positions[] = { 0, 0, 1,
@@ -33,10 +32,6 @@ int main(int argc, char *argv[])
     return 1;
   }
   
-  enumeration = alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT");
-  if (enumeration != AL_FALSE)
-    printf("Device Specifiers: %s\n", alcGetString(NULL, ALC_DEVICE_SPECIFIER));
-
   context = alcCreateContext(device, NULL);
   if ((context == NULL) || (alcMakeContextCurrent(context) == AL_FALSE))
   {
@@ -75,10 +70,10 @@ int main(int argc, char *argv[])
 
     alSourcePlay(source);
 
-    alGetSourcei(source, AL_SOURCE_STATE, &source_state);
-    // check for errors
-    while (source_state == AL_PLAYING)
+    do
+    {
       alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+    } while (source_state == AL_PLAYING);
 
     sleep(1);
   }
