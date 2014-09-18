@@ -14,8 +14,19 @@ int main(int argc, char *argv[])
   const char *version, *renderer, *vendor, *extensions;
   char *e, *p;
 
-  device = alcOpenDevice(NULL);
-  context = alcCreateContext(device, NULL);
+  if ((device = alcOpenDevice(NULL)) == NULL)
+  {
+    fprintf(stderr, "ERRO abrindo dispositivo.\n");
+    return 1;
+  }
+
+  if ((context = alcCreateContext(device, NULL)) == NULL)
+  {
+    alcCloseDevice(device);
+    fprintf(stderr, "ERRO ao criar contexto default.\n");
+    return 1;
+  }
+
   alcMakeContextCurrent(context);
 
   version = alGetString(AL_VERSION);
