@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
 
   if ((device = alcOpenDevice(NULL)) == NULL)
   {
+    alutExit();
     fprintf(stderr, "Erro inicializando dispositivo.\n");
     return 1;
   }
@@ -38,6 +39,7 @@ int main(int argc, char *argv[])
   {
     fprintf(stderr, "Erro ajustando contexto.\n");
     alcCloseDevice(device);
+    alutExit();
     return 1;
   }
 
@@ -54,6 +56,7 @@ int main(int argc, char *argv[])
     alDeleteSources(1, &source);
     alcMakeContextCurrent(NULL);
     alcCloseDevice(device);
+    alutExit();
     fprintf(stderr, "Error creating buffer.\n");
     return 1;
   }
