@@ -20,7 +20,8 @@ int main(int argc, char *argv[])
                          -1, 0, 0 };
   int i;
 
-  if (alutInit(&argc, argv) == AL_FALSE)
+  // FIXME: alutInit creates an initial context?!
+  if (alutInitWithoutContext(&argc, argv) == AL_FALSE)
   {
     fprintf(stderr, "Error initializing ALUT.\n");
     return 1;
@@ -84,6 +85,7 @@ int main(int argc, char *argv[])
   alcMakeContextCurrent(NULL);
   alcDestroyContext(context);
   alcCloseDevice(device);
+  alutExit();
 
   return 0;
 }
