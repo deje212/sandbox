@@ -63,4 +63,7 @@
     (x) = ((unsigned long long)__hi << 32) + __lo; \
   }
 
+extern unsigned long long start_cycle_count(void);
+extern unsigned long long end_cycle_count(void);
+
 #endif
