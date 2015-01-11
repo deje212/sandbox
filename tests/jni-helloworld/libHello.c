@@ -19,7 +19,12 @@
 
             Veja HelloWorld.java. 
 */
-JNIEXPORT void JNICALL Java_HelloWorld_print(JNIEnv *env, jobject obj)
+JNIEXPORT void JNICALL Java_HelloWorld_print(JNIEnv *env, jobject obj, jstring javaString)
 {
-  printf("Hello, world!\n");
+  const char *str;
+
+  str = (*env)->GetStringUTFChars(env, javaString, 0);
+
+  printf("%s\n", str);
+  (*env)->ReleaseStringUTFChars(env, javaString, str);
 }
