@@ -16,4 +16,6 @@ ac=$(ffmpeg -i "$1" 2>&1 | grep "Audio:" | awk '{ print $4 }' | sed 's/,//')
 #    chmod +x convert; \
 #    ./convert && rm convert
 #
-echo "\"$1\" #($vc,$ac)"
+
+filename=$(echo "$1" | sed -e '{s/\$/\\$/g;s/"/\\"/g;s/\*/\\*/g;s/\[/\\[/g;s/\]/\\]/g}')
+echo "\"$filename\" #($vc,$ac)"
