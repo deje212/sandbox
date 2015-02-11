@@ -1,17 +1,19 @@
-# Meu MinGW é o do Linux... substitua por gcc se seu MinGW estiver no Windows.
-CC = i586-mingw32msvc-gcc
-CFLAGS = -O3 -mtune=native -c
+CC = i586-mingw32msvc-cc
+RC = i586-mingw32msvc-windres
+CFLAGS = -O3 -mtune=native -D__SINGLE_INSTANCE__
 
-# Temos que passar a opção --subsystem,windows para o linker!
-winapp.exe: winapp.o
-	$(CC) -s -o $@ $^ -Wl,--subsystem,windows
+winapp.exe: winapp.o winappres.o
+	$(CC) -O3 -s -o $@ $^ -Wl,-subsystem=windows
 
 winapp.o: winapp.c
 
+winappres.o: winapp.rc
+	$(RC) $< $@
+
+winapp.c: winapp.c.in
+	sed "s/@uniqueid@/$$(uuidgen -r)/" winapp.c.in > winapp.c
+
 .PHONY: clean
 
-# Substitua 'rm' por 'del' se seu ambiente é Windows.
 clean:
-	@rm *.exe
-	@rm *.o  
-
+	-rm *.c *.o *.exe
