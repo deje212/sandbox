@@ -8,7 +8,20 @@
 EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
 # Usa preset do x264 com maior poder de análise.
-VPARAMS="-c:v libx264 -q:v 0"
+VPARAMS="-c:v libx264 -crf 18 -preset veryslow"
+
+# Usa tunning film ou animation. "film" é default, se o último parâmetro 
+# não for informado.
+if [ $# -eq 2 ]; then
+  case $2 in
+    (film) VPARAMS="$VPARAMS -tune film";;
+    (animation) VPARAMS="$VPARAMS -tune animation";;
+    (*) echo "ERROR: tunning parameter must be not given, \"film\" or \"animation\"."; 
+        exit;;
+  esac 
+else
+  VPARAMS="$VPARAMS -tune film"
+fi
 
 ABR=$(ffmpeg -i "$1" 2>&1 | grep Audio: | sed 's/^.*, \([0-9]*\) kb\/s.*$/\1/');
 if [ $ABR -le 64 ]; then ABR=64; else
