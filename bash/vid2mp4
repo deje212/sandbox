@@ -8,35 +8,25 @@
 EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
 # Usa preset do x264 com maior poder de análise.
-VPARAMS="-c:v libx264 -crf 18 -preset veryslow"
+VPARAMS="-c:v libx264 -qmin 1 -qmax 10"
 
-# Usa tunning film ou animation. "film" é default, se o último parâmetro 
-# não for informado.
-if [ $# -eq 2 ]; then
-  case $2 in
-    (film) VPARAMS="$VPARAMS -tune film";;
-    (animation) VPARAMS="$VPARAMS -tune animation";;
-    (*) echo "ERROR: tunning parameter must be not given, \"film\" or \"animation\"."; 
-        exit;;
-  esac 
+if ffprobe "$1" 2>&1 | grep Audio: 2>&1 /dev/null; then
+  ABR=$(ffmpeg -i "$1" 2>&1 | grep Audio: | sed 's/^.*, \([0-9]*\) kb\/s.*$/\1/');
+  if [ $ABR -le 64 ]; then ABR=64; else
+  if [ $ABR -le 96 ]; then ABR=96; else
+  if [ $ABR -le 128 ]; then ABR=128; else
+  if [ $ABR -le 160 ]; then ABR=160; else
+  if [ $ABR -le 192 ]; then ABR=192; else
+  if [ $ABR -le 256 ]; then ABR=256; else
+    ABR=384;
+  fi fi fi fi fi fi
+
+  ABR=$ABR"k";
+  APARAMS="-c:a ac3 -b:a $ABR -ac 2"
+  unset ABR
 else
-  VPARAMS="$VPARAMS -tune film"
+  APARAMS="-an"
 fi
-
-ABR=$(ffmpeg -i "$1" 2>&1 | grep Audio: | sed 's/^.*, \([0-9]*\) kb\/s.*$/\1/');
-if [ $ABR -le 64 ]; then ABR=64; else
-if [ $ABR -le 96 ]; then ABR=96; else
-if [ $ABR -le 128 ]; then ABR=128; else
-if [ $ABR -le 160 ]; then ABR=160; else
-if [ $ABR -le 192 ]; then ABR=192; else
-if [ $ABR -le 256 ]; then ABR=256; else
-  ABR=384;
-fi fi fi fi fi fi
-
-ABR=$ABR"k";
-APARAMS="-c:a ac3 -b:a $ABR -ac 2"
-
-unset ABR
 
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.mp4)"
 OFNAME="${1%.*}.mp4"
