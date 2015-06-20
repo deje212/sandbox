@@ -1,53 +1,75 @@
 #!/bin/bash
 
 [[ $# -lt 1 ]] && { 
-	echo "Usage: vid2mp4 <inputvideo> [film|animation]"; 
+	echo "Usage: vid2mp4 [--copy] <inputvideo>"; 
 	exit 3; 
 }
 
-EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
-
-# Usa preset do x264 com maior poder de análise.
-VPARAMS="-c:v libx264 -crf 18 -preset veryslow"
-
-# Usa tunning film ou animation. "film" é default, se o último parâmetro 
-# não for informado.
-if [ $# -eq 2 ]; then
-  case $2 in
-    (film) VPARAMS="$VPARAMS -tune film";;
-    (animation) VPARAMS="$VPARAMS -tune animation";;
-    (*) echo "ERROR: tunning parameter must be not given, \"film\" or \"animation\"."; 
-        exit;;
-  esac 
+COPY=0
+if [ "$1" == "--copy" ]; then
+  COPY=1
+  FILE="$2"
 else
-  VPARAMS="$VPARAMS -tune film"
+  if [ "$2" == "--copy" ]; then
+    COPY=1
+  fi
+  FILE="$1"
 fi
 
-ABR=$(ffmpeg -i "$1" 2>&1 | grep Audio: | sed 's/^.*, \([0-9]*\) kb\/s.*$/\1/');
-if [ $ABR -le 64 ]; then ABR=64; else
-if [ $ABR -le 96 ]; then ABR=96; else
-if [ $ABR -le 128 ]; then ABR=128; else
-if [ $ABR -le 160 ]; then ABR=160; else
-if [ $ABR -le 192 ]; then ABR=192; else
-if [ $ABR -le 256 ]; then ABR=256; else
-  ABR=384;
-fi fi fi fi fi fi
+EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
-ABR=$ABR"k";
-APARAMS="-c:a ac3 -b:a $ABR -ac 2"
+VCODEC=`ffprobe "$FILE" 2>&1 | grep Video: | sed 's/^.*Video: \(\w*\) .*$/\1/'`
+if [ "$VCODEC" == "h264" ]; then
+  VPARAMS="-c:v copy"
+else
+  # Usa preset do x264 com maior poder de análise.
+  VPARAMS="-c:v libx264 -q:v 0"
+fi
 
-unset ABR
+ACODEC=`ffprobe "$FILE" 2>&1 | grep Audio: | sed 's/^.*Audio: \(\w*\) .*$/\1/'`
+if [ "$ACODEC" == "ac3" ]; then
+  APARAMS="-c:a copy"
+else
+  ABR=$(ffmpeg -i "$FILE" 2>&1 | grep Audio: | sed 's/^.*, \([0-9]*\) kb\/s.*$/\1/');
+  if [ $ABR -le 64 ]; then ABR=64; else
+    if [ $ABR -le 96 ]; then ABR=96; else
+      if [ $ABR -le 128 ]; then ABR=128; else
+        if [ $ABR -le 160 ]; then ABR=160; else
+          ABR=192;
+        fi 
+      fi 
+    fi 
+  fi
+
+  # Convert to stereo!
+  APARAMS="-c:a ac3 -b:a ${ABR}k -ac 2"
+
+  unset ABR
+fi
 
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.mp4)"
-OFNAME="${1%.*}.mp4"
+OFNAME="${FILE%.*}.mp4"
 
-ffmpeg -y -i "$1" $VPARAMS $APARAMS $EXTRA_PARAMS "$TMPFNAME" && \
-  rm "$1" && \
+# If we want to make a copy, check if the output filename is the same as the input...
+if [ $COPY -eq 1 ]; then
+  if [ "$OFNAME" == "$FILE" ]; then
+    OFNAME="_$OFNAME"
+  fi
+fi
+
+ffmpeg -y -i "$FILE" $VPARAMS $APARAMS $EXTRA_PARAMS "$TMPFNAME"
+if [ $? -eq 0 ]; then 
+  # If we want to overwrite, delete the original file...
+  if [ $COPY -eq 0 ]; then
+    rm "$FILE"
+  fi
+
+  # ... move the temporary file to the new one.
   mv "$TMPFNAME" "$OFNAME"
+else
+  # in case of error, delete the temporary.
+  rm "$TMPFNAME"
+fi
 
-unset VPARAMS
-unset APARAMS
-unset EXTRA_PARAMS
-unset TMPFNAME
-unset OFNAME
+unset VPARAMS APARAMS EXTRA_PARAMS TMPFNAME OFNAME
 
