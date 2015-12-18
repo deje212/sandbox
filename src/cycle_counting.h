@@ -13,9 +13,9 @@
 
       uint64_t t1, t2;
 
-      START_CYCLE_COUNT(t1);
+      t1 = START_CYCLE_COUNT();
       f();
-      STOP_CYCLE_COUNT(t2);
+      t2 = STOP_CYCLE_COUNT();
 
       // Neste ponto (t2 - t1) conterá a
       // quantidade de ciclos gastos por f().
@@ -27,43 +27,26 @@
     As macros, em si, não são "otimizáveis", por assim dizer.
    ========================================== */
 
-/* Diversas instruções rdtscp para serialização e warmup. */
-/* Infelizmente o assembly inline do GCC não permite usar
-   a restrição "=A" para atualizar um 'unsigned long long'
-   de uma só vez! */
-#define START_CYCLE_COUNT(x) \
-  { \
-    unsigned long __lo, __hi; \
-    \
-    __asm__ volatile ( \
-      "rdtscp; \
-       rdtscp; \
-       rdtscp; \
-       rdtscp; \
-       rdtscp; \
-       rdtscp; \
-       rdtscp; \
-       rdtscp; \
-       rdtscp;" \
-      : "=a" (__lo), "=d" (__hi) : : "%ecx" \
+#define START_CYCLE_COUNT() \
+  ({ unsigned long tmp; \
+     __asm__ __volatile__ ( \
+      "mfence\n" \
+      "rdtsc\n" \
+      "shlq $32,%%rdx\n" \
+      "orq %%rdx,%%rax" \
+      : "=a" (tmp) : : "rdx" \
     ); \
   \
-    (x) = ((unsigned long long)__hi << 32) + __lo; \
-  }
+    tmp; })
 
 #define STOP_CYCLE_COUNT(x) \
-  { \
-    unsigned long __lo, __hi; \
-    \
-    __asm__ volatile ( \
-      "rdtscp;" \
-      : "=a" (__lo), "=d" (__hi) : : "%ecx" \
-    ); \
-  \
-    (x) = ((unsigned long long)__hi << 32) + __lo; \
-  }
-
-extern unsigned long long start_cycle_count(void);
-extern unsigned long long end_cycle_count(void);
+  ({  unsigned long tmp; \
+      __asm__ volatile ( \
+        "rdtscp;" \
+        "shlq $32,%%rdx\n" \
+        "orq %%rdx,%%rax" \
+        : "=a" (tmp) : : "rcx", "rdx" \
+      ); \
+      tmp; })
 
 #endif
