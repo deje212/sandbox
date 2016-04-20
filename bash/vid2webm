@@ -1,0 +1,19 @@
+#!/bin/bash
+
+[ $# -lt 1 ] && { 
+	echo "Usage: vid2webm <inputvideo>"; 
+	exit 3; 
+}
+
+FILENAME="$1"
+
+EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
+
+# Usa preset do x264 com maior poder de análise.
+VPARAMS="-c:v libvpx -quality best -qmax 23 -c:a libvorbis"
+
+TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.webm)"
+OFNAME="${FILENAME%.*}.webm"
+
+ffmpeg -y -i "$FILENAME" $VPARAMS $EXTRA_PARAMS $TMPFNAME && rm "$FILENAME" && mv $TMPFNAME "$OFNAME"
+
