@@ -4,21 +4,18 @@
 /* ==========================================
     Quick & Dirty cycle counting...
 
-    START_CYCLE_COUNT() e STOP_CYCLE_COUNT()
+    begin_tsc() e end_tsc()
 
     são usadas para contar a quantidade de ciclos
     de máquina gastos num bloco de código.
 
     Exemplo de uso:
 
-      uint64_t t1, t2;
+      unsigned long long t;
 
-      t1 = START_CYCLE_COUNT();
+      begin_tsc();      
       f();
-      t2 = STOP_CYCLE_COUNT();
-
-      // Neste ponto (t2 - t1) conterá a
-      // quantidade de ciclos gastos por f().
+      t = end_tsc();
 
     É conveniente compilar o código sob teste com a
     opção -O0, já que o compilador poderá 'sumir' com
@@ -27,26 +24,24 @@
     As macros, em si, não são "otimizáveis", por assim dizer.
    ========================================== */
 
-#define START_CYCLE_COUNT() \
-  ({ unsigned long tmp; \
-     __asm__ __volatile__ ( \
-      "mfence\n" \
-      "rdtsc\n" \
-      "shlq $32,%%rdx\n" \
-      "orq %%rdx,%%rax" \
-      : "=a" (tmp) : : "rdx" \
-    ); \
-  \
-    tmp; })
+static unsigned long long _tsc;
 
-#define STOP_CYCLE_COUNT(x) \
-  ({  unsigned long tmp; \
-      __asm__ volatile ( \
-        "rdtscp;" \
-        "shlq $32,%%rdx\n" \
-        "orq %%rdx,%%rax" \
-        : "=a" (tmp) : : "rcx", "rdx" \
-      ); \
-      tmp; })
+inline void begin_tsc(void)
+{
+  unsigned int a, d;
 
-#endif
+  asm volatile ( "mfence\nxorl %%eax,%%eax\ncpuid\nrdtsc"
+      : "=a" (a), "=d" (d) : : "rbx" );
+
+  _tsc = ((unsigned long long)d << 32) | (unsigned long long)a;
+}
+
+inline unsigned long long end_tsc(void)
+{
+  unsigned int a, d;
+
+  asm volatile ( "rdtscp"
+      : "=a" (a), "=d" (d) : : "rcx" );
+
+  return (((unsigned long long)d << 32) | (unsigned long long)a) - _tsc;
+}
