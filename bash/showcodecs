@@ -1,12 +1,19 @@
 #!/bin/bash
 
-[[ $# -ne 1 ]] && {
+[ $# -ne 1 ] && {
 	echo "Usage: showcodecs <filename>";
 	exit 3;
 }
 
-vc=$(ffmpeg -i "$1" 2>&1 | grep "Video:" | awk '{ print $4 }')
-ac=$(ffmpeg -i "$1" 2>&1 | grep "Audio:" | awk '{ print $4 }' | sed 's/,//')
+vc=""
+for i in $(ffprobe "$1" 2>&1 | sed -n '/Video:/s/^.\+Video: \+\(\w\+\),* .\+$/\1/p' | uniq); do 
+  if [ -z "$vc" ]; then vc="$i"; else vc="$vc $i"; fi
+done;
+
+ac=""
+for i in $(ffprobe "$1" 2>&1 | sed -n '/Audio:/s/^.\+Audio: \+\(\w\+\),* .\+$/\1/p' | uniq); do 
+  if [ -z "$ac" ]; then ac="$i"; else ac="$ac $i"; fi
+done;
 
 # Show codecs as comments to make possible to use this output
 # to create an script calling vid2mp4, this way:
@@ -16,6 +23,11 @@ ac=$(ffmpeg -i "$1" 2>&1 | grep "Audio:" | awk '{ print $4 }' | sed 's/,//')
 #    chmod +x convert; \
 #    ./convert && rm convert
 #
+filename="$(echo "$1" | sed 's/\$/\\$/g;s/"/\\"/g;s/\*/\\*/g;s/\[/\\[/g;s/\]/\\]/g')"
 
-filename=$(echo "$1" | sed -e '{s/\$/\\$/g;s/"/\\"/g;s/\*/\\*/g;s/\[/\\[/g;s/\]/\\]/g}')
-echo "\"$filename\" #($vc,$ac)"
+echo -n "\"${filename}\" #("
+if [ -z "$ac" ]; then
+  echo "$vc)"
+else
+  echo "$vc, $ac)"
+fi

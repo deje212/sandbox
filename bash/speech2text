@@ -22,7 +22,7 @@ trap "" INT
 
 echo "Recording... Press Ctrl+C to Stop."
 
-ffmpeg -y -f alsa -i $ALSA_DEVICE -ar $SAMPLE_RATE -ac 1 -acodec flac "$TMP_FLAC" > /dev/null 2>&1
+ffmpeg -y -f alsa -i $ALSA_DEVICE -ar $SAMPLE_RATE -ac 1 -acodec flac "$TMP_FLAC" 2>&1 > /dev/null
 
 echo "Processing..."
 
@@ -30,7 +30,7 @@ FROM_PHRASE=`wget -q -U "Mozilla/5.0" \
      --post-file "$TMP_FLAC" \
      --header "Content-Type: audio/x-flac; rate=$SAMPLE_RATE" \
       -O - "http://www.google.com/speech-api/v1/recognize?lang=${FROM_LANG2}&client=chromium" | \
-        cut -d\" -f12`
+             cut -d\" -f12`
 
 # Não precisamos mais do arquivo de audio.
 rm -f $TMP_FLAC
@@ -48,5 +48,4 @@ TO_PHRASE=`wget -q -U "Mozilla/5.0" -O - "http://translate.google.com?tr=${FROM_
 # Just say it!
 wget -q -U "Mozilla/5.0" -O - "http://translate.google.com/translate_tts?ie=UTF-8&tl=${TO_LANG}&q=${TO_PHRASE}" | \
   ffplay -autoexit -nodisp - > /dev/null 2>&1
-
 
