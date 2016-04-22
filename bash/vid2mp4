@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[[ $# -lt 1 ]] && { 
+[ $# -lt 1 ] && { 
 	echo "Usage: vid2mp4 <inputvideo>"; 
 	exit 3; 
 }
@@ -9,7 +9,7 @@ FILENAME="$1"
 
 EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
-VCODEC=`ffprobe "$1" 2>&1 | sed -n '/Video:/s/^.\+Video: \(\w\+\),* \+.\+$/\1/p'`
+VCODEC="$(ffprobe "$1" 2>&1 | sed -n '/Video:/s/^.\+Video: \(\w\+\),* \+.\+$/\1/p')"
 
 # Usa preset do x264 com maior poder de análise.
 if [ "$VCODEC" == "h264" ]; then
@@ -24,9 +24,9 @@ if [ "$ACODEC" == "ac3" ]; then
   APARAMS="-c:a copy"
 else
   ABR="$(ffprobe "$FILENAME" 2>&1 | sed -n '/Audio:/s/^.\+ \([0-9]\+\) kb\/s.\+$/\1/p')"
-  if [ "$ABR" == "" ]; then 
-    echo "Cannot find \"${FILENAME}\"."
-    exit 3 
+  if [ -z "$ABR" ]; then 
+    echo "Cannot find audio bitrate. Using 128 kbps!"
+    ABR=128
   fi
 
   if [ $ABR -le 64 ]; then ABR=64; else
@@ -47,5 +47,9 @@ fi
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.mp4)"
 OFNAME="${FILENAME%.*}.mp4"
 
-ffmpeg -y -i "$FILENAME" $VPARAMS $APARAMS $EXTRA_PARAMS $TMPFNAME && rm "$FILENAME" && mv $TMPFNAME "$OFNAME"
+echo "FILENAME=\"$FILENAME\""
+echo "TMPFNAME=\"$TMPFNAME\""
 
+ffmpeg -y -i "$FILENAME" $VPARAMS $APARAMS $EXTRA_PARAMS $TMPFNAME && \
+  rm "$FILENAME" && \
+  mv "$TMPFNAME" "$OFNAME"
