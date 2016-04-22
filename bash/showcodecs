@@ -5,24 +5,28 @@
 	exit 3;
 }
 
+#
+# Show codecs as comments, making possible to use this script like this:
+#
+# $ find -name \* -exec showcodecs "{}" \; | grep aac | \
+#   sed 's/ #(.\+$//' | xargs -i vid2mp4 {}
+#
+
+# scan for all video vodecs.
 vc=""
 for i in $(ffprobe "$1" 2>&1 | sed -n '/Video:/s/^.\+Video: \+\(\w\+\),* .\+$/\1/p' | uniq); do 
   if [ -z "$vc" ]; then vc="$i"; else vc="$vc $i"; fi
 done;
 
+# scan for all audio codecs.
 ac=""
 for i in $(ffprobe "$1" 2>&1 | sed -n '/Audio:/s/^.\+Audio: \+\(\w\+\),* .\+$/\1/p' | uniq); do 
   if [ -z "$ac" ]; then ac="$i"; else ac="$ac $i"; fi
 done;
 
-# Show codecs as comments to make possible to use this output
-# to create an script calling vid2mp4, this way:
-#
-#  $ echo '#!/bin/bash' > convert; \
-#    find -name \*.mp4 -exec showcodecs "{}" \; | grep -v ac3 | sed 's/^/vid2mp4 /' >> convert; \
-#    chmod +x convert; \
-#    ./convert && rm convert
-#
+# ignore subtitle codecs!
+
+# Translate special chars.
 filename="$(echo "$1" | sed 's/\$/\\$/g;s/"/\\"/g;s/\*/\\*/g;s/\[/\\[/g;s/\]/\\]/g')"
 
 echo -n "\"${filename}\" #("
