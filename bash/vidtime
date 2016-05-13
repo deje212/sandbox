@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]
+then
+  echo "vidtime <file>"
+  exit 3
+fi
+
+VIDTIME="`ffprobe "$1" 2>&1 | sed -n 's/^.*Duration: \([0-9:.]\+\).*$/\1/p'`"
+HOURS=${VIDTIME:0:2}
+MINS=${VIDTIME:3:2}
+SECS=${VIDTIME:6}
+SECS="`echo "scale=2; $HOURS*3600+$MINS*60+$SECS" | bc`"
+
+echo "\"$1\" ($VIDTIME - $SECS seconds)"
