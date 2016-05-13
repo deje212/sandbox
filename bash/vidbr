@@ -12,5 +12,9 @@ FILEBR="`ffprobe "$1" 2>&1 | sed -n 's/^.*Duration:.*bitrate: \([0-9]\+\) kb\/s.
 VIDBR="`ffprobe "$1" 2>&1 | sed -n 's/^.*Video:.* \([0-9]\+\) kb\/s.*$/\1/p'`"
 AUDBR="`ffprobe "$1" 2>&1 | sed -n 's/^.*Audio:.* \([0-9]\+\) kb\/s.*$/\1/p'`"
 
+FILEBR=${FILEBR:-'?'}
+VIDBR=${VIDBR:-'?'}
+AUDBR=${AUDBR:-'?'}
+
 echo "\"$1\" (total: $FILEBR kb/s, video: $VIDBR kb/s, audio: $AUDBR kb/s)"
 
