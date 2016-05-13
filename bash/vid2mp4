@@ -15,7 +15,7 @@ VCODEC="$(ffprobe "$1" 2>&1 | sed -n '/Video:/s/^.\+Video: \(\w\+\),* \+.\+$/\1/
 if [ "$VCODEC" == "h264" ]; then
   VPARAMS="-c:v copy"
 else
-  VPARAMS="-c:v libx264 -q:v 0"
+  VPARAMS="-c:v libx264 -qmax 23 -crf 17"
 fi
 
 ACODEC="$(ffprobe "$FILENAME" 2>&1 | sed -n '/Audio:/s/^.\+Audio: \(\w\+\),* \+.\+$/\1/p')"
