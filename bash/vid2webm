@@ -1,16 +1,24 @@
 #!/bin/bash
 
-[ $# -lt 1 ] && { 
+if [ $# -lt 1 ]
+then
 	echo "Usage: vid2webm <inputvideo>"; 
 	exit 3; 
-}
+fi
 
 FILENAME="$1"
 
 EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
+VBITRATE="`ffprobe "$1" 2>&1 | sed -n 's/^.\+: Video: .\+, \([0-9]\+\) kb\/s.*$/\1/p'`"
+if [ -z "$VBITRATE" ]
+then
+  VBITRATE="`ffprobe "$1" 2>&1 | sed -n 's/^.*Duration: .*bitrate: \([0-9]\+\) kb\/s.*$/\1/p'`"
+fi
+
+
 # Usa preset do x264 com maior poder de análise.
-VPARAMS="-c:v libvpx -quality best -qmax 23 -c:a libvorbis"
+VPARAMS="-c:v libvpx -crf 10 -qmin 0 -qmax 23 -b:v ${VBITRATE}k -c:a libvorbis"
 
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.webm)"
 OFNAME="${FILENAME%.*}.webm"
