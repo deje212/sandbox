@@ -1,19 +1,8 @@
 #!/bin/bash
 
-[[ $# -ne 1 ]] && {
+if [ $# -ne 1 ]; then
   echo "Usage: audio2ogg <audiofile-name>";
   exit 3;
-}
+fi
 
-abr=$(ffmpeg -i "$1" 2>&1 | grep Audio: | sed 's/^.* \([0-9]*\) kb\/s.*$/\1/');
-if [ $abr -le 64 ]; then abr="64"; else
-if [ $abr -le 96 ]; then abr="96"; else
-if [ $abr -le 128 ]; then abr="128"; else
-if [ $abr -le 160 ]; then abr="160"; else
-if [ $abr -le 192 ]; then abr="192"; else
-if [ $abr -le 256 ]; then abr="256"; else
-abr="384";
-fi fi fi fi fi fi
-abr=$abr"k";
-
-ffmpeg -i "$1" -vn -c:a libvorbis -b:a $abr "${1%.*}.ogg" && rm "$1"
+ffmpeg -i "$1" -vn -c:a libvorbis -q:a "${1%.*}.ogg" && rm "$1"

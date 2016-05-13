@@ -1,8 +1,8 @@
 #!/bin/bash
 
-[[ $# -ne 1 ]] && {
+if [ $# -ne 1 ]; then
   echo "Usage: audio2mp3 <audiofile-name>";
   exit 3;
-}
+fi
 
-ffmpeg -y -i "$1" -vn -b:a 128k "${1%.*}.mp3" && rm "$1"
+ffmpeg -y -i "$1" -vn -q:a 5 "${1%.*}.mp3" && rm "$1"
