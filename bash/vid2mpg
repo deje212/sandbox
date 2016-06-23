@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]
+then
+	echo "Usage: vid2mpg <inputvideo>"; 
+	exit 3; 
+fi
+
+FILENAME="$1"
+FTYPE="${1#*.}"
+FTYPE="${FTYPE^^*}"
+if [ "$FTYPE" == "MPG" ] || [ "$FTYPE" == "MPEG" ]; then
+  echo -e "\e[1mError\e[0m: File '$1' is already a MPEG video."
+  exit 1
+fi
+
+EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
+
+VBITRATE="`ffprobe "$1" 2>&1 | sed -n 's/^.\+: Video: .\+, \([0-9]\+\) kb\/s.*$/\1/p'`"
+if [ -z "$VBITRATE" ]; then
+  VBITRATE="`ffprobe "$1" 2>&1 | sed -n 's/^.*Duration: .*bitrate: \([0-9]\+\) kb\/s.*$/\1/p'`"
+fi
+
+# Usa preset do x264 com maior poder de análise.
+VPARAMS="-qmin 0 -qmax 23"
+
+TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.mpg)"
+OFNAME="${FILENAME%.*}.mpg"
+
+ffmpeg -y -i "$FILENAME" $VPARAMS $EXTRA_PARAMS $TMPFNAME && mv $TMPFNAME "$OFNAME"
+
