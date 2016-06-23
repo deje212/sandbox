@@ -7,41 +7,48 @@
 
 FILENAME="$1"
 
-EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
+# Retira metadados do vídeo destino.
+EXTRA_PARAMS="-map_metadata -1"
 
+# Pega o nome do codec de vídeo.
 VCODEC="$(ffprobe "$1" 2>&1 | sed -n '/Video:/s/^.\+Video: \(\w\+\),* \+.\+$/\1/p')"
 
-# Usa preset do x264 com maior poder de análise.
+# Ajusta parâmetros de compressão para h264
 if [ "$VCODEC" == "h264" ]; then
   VPARAMS="-c:v copy"
 else
-  VPARAMS="-c:v libx264 -qmax 23 -crf 17"
+  VPARAMS="-c:v libx264 -qmin 1 -qmax 23 -crf 17"
 fi
 
+# Pega o nome do codec de audio.
 ACODEC="$(ffprobe "$FILENAME" 2>&1 | sed -n '/Audio:/s/^.\+Audio: \(\w\+\),* \+.\+$/\1/p')"
 
 if [ "$ACODEC" == "ac3" ]; then
   APARAMS="-c:a copy"
-else
+elif [ ! -z "$ACODEC" ]; then
+  # Pega o bitrate de audio.
   ABR="$(ffprobe "$FILENAME" 2>&1 | sed -n '/Audio:/s/^.\+ \([0-9]\+\) kb\/s.\+$/\1/p')"
+
   if [ -z "$ABR" ]; then 
     echo "Cannot find audio bitrate. Using 128 kbps!"
     ABR=128
-  fi
-
-  if [ $ABR -le 64 ]; then ABR=64; else
-    if [ $ABR -lt 96 ]; then ABR=64; else
-      if [ $ABR -lt 128 ]; then ABR=96; else
-        if [ $ABR -lt 160 ]; then ABR=128; else
-          if [ $ABR -lt 192 ]; then ABR=160; else
-            ABR=192;
-          fi
+  else
+    if [ $ABR -le 64 ]; then ABR=64; else
+      if [ $ABR -lt 96 ]; then ABR=64; else
+        if [ $ABR -lt 128 ]; then ABR=96; else
+          if [ $ABR -lt 160 ]; then ABR=128; else
+            if [ $ABR -lt 192 ]; then ABR=160; else
+              ABR=192;
+            fi
+          fi 
         fi 
       fi 
-    fi 
-  fi
+    fi
 
   APARAMS="-c:a ac3 -b:a ${ABR}k -ac 2"
+else
+  # Não tem audio!
+  APARAMS="-an"
 fi
 
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.mp4)"
