@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+  echo -e "\e[1mUsage\e[0m: optimizeJpeg <jpegfile>"
+  exit 1
+fi
+
+ftype="${1#*.}"
+ftype="${ftype^^*}"
+if [ "$ftype" != "JPG" ] && [ "$ftype" != "JPEG" ]; then
+  echo -e "\e[1mError\e[0m: File '$1' must be a JPEG."
+  exit 1
+fi
+
+orig="${1%.*}.orig.jpg"
+mv "$1" "$orig"
+convert -strip -interlace Plane -quality 85% "$orig" "$1"

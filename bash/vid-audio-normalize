@@ -5,7 +5,7 @@
 #
 
 if [ $# -ne 1 ]; then
-  echo "vid-audio-normalize \<inputvideofile\>";
+  echo -e "\e[1mUsage\e[0m: vid-audio-normalize <inputvideofile>";
   exit 1;
 fi
 

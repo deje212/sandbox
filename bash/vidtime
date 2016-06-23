@@ -2,7 +2,7 @@
 
 if [ $# -ne 1 ]
 then
-  echo "vidtime <file>"
+  echo -e "\e[1mUsage\e[0m: vidtime <file>"
   exit 3
 fi
 

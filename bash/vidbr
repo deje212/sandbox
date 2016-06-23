@@ -2,7 +2,7 @@
 
 if [ $# -ne 1 ]
 then
-  echo "vidbr <filename>"
+  echo -e "\e[1mUsage\e[0m: vidbr <filename>"
   exit 3
 fi
 

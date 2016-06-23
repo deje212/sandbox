@@ -1,14 +1,14 @@
 #!/bin/bash
 
 if [ $# -ne 1 ]; then
-	echo "Usage: pic2png <picfile-name>";
+	echo -e "\e[1mUsage\e[0m: pic2png <picfile-name>";
 	exit 1;
 fi
 
 gtype="${1%*.}"
 gtype="${gtype^^*}"
 if [ "$gtype" == "PNG" ]; then
-  echo "\e[1mError\e[0m: File '$1' is a PNG already."
+  echo -e "\e[1mError\e[0m: File '$1' is a PNG already."
   exit 1
 fi
 

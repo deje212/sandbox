@@ -2,7 +2,7 @@
 
 if [ $# -lt 1 ]
 then
-	echo "Usage: vid2mpg <inputvideo>"; 
+	echo -e "\e[1mUsage\e[0m: vid2mpg <inputvideo>"; 
 	exit 3; 
 fi
 

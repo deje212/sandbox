@@ -1,14 +1,14 @@
 #!/bin/bash
 
 if [ $# -ne 1 ]; then
-  echo "Usage: audio2mp3 <audiofile-name>";
+  echo -e "\e[1mUsage\e[0m: audio2mp3 <audiofile-name>";
   exit 1;
 fi
 
 afile="${1#*.}"
 afile="${afile^^*}"
 if [ "$afile" == "MP3" ]; then
-  echo "File '$1' is already a MP3."
+  echo -e "\e[1mError\e[0m: File '$1' is already a MP3."
   exit 1
 fi
 

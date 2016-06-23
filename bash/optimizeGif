@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+  echo -e "\e[1mUsage\e[0m: optimizeGif <file.gif> <colors>"
+  exit 1
+fi
+
+if [ $2 -lt 2 ]; then
+  echo -e "\e[1mError\e[0m: At least 2 colors required."
+  exit 1
+fi
+
+if [ $2 -gt 256 ]; then
+  echo -e "\e[1mError\e[0m: Maximum of 256 colors supported."
+  exit 1
+fi
+
+ftype="${1#*.}"
+ftype="${ftype^^*}"
+if [ "$ftype" != "GIF" ]; then
+  echo -e "\e[1mError\e[0m: File '$1' must be a GIF."
+  exit 1
+fi
+
+orig="${1%.*}.orig.gif"
+
+mv "$1" "$orig"
+convert "$orig" -dither none -matte -depth 8 -deconstruct -layers optimizePlus -colors $2 "$1"
