@@ -2,8 +2,7 @@
 
 # Dica de nixCraft.
 
-gzipchk()
-{ 
+gzipchk() { 
   curl -sILH 'Accept-Encoding: gzip,deflate' "$@" | grep --color 'Content-Encoding:'; 
 }
 
