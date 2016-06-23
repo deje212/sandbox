@@ -5,4 +5,11 @@ if [ $# -ne 1 ]; then
   exit 3;
 fi
 
+afile="${1#*.}"
+afile="${afile^^*}"
+if [ "$afile" == "OGG" ]; then
+  echo "File '$1' is already a Ogg-Vorbis."
+  exit 1
+fi
+
 ffmpeg -i "$1" -vn -c:a libvorbis -q:a "${1%.*}.ogg" && rm "$1"

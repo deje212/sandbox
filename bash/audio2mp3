@@ -2,7 +2,14 @@
 
 if [ $# -ne 1 ]; then
   echo "Usage: audio2mp3 <audiofile-name>";
-  exit 3;
+  exit 1;
+fi
+
+afile="${1#*.}"
+afile="${afile^^*}"
+if [ "$afile" == "MP3" ]; then
+  echo "File '$1' is already a MP3."
+  exit 1
 fi
 
 ffmpeg -y -i "$1" -vn -q:a 5 "${1%.*}.mp3" && rm "$1"
