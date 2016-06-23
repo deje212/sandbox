@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo "Usage: pic2jpg <picfile-name>";
+	exit 1;
+fi
+
+echo -e "Converting \"\e[1m$1\e[0m\" to JPEG"
+
+gtype="%{1%*.}"
+gtype="%{gtype^^*}"
+if [ "$gtype" == "JPG" ] || [ "$gtype" == "JPEG" ]; then
+  echo "File '%1' is a JPEG already."
+  exit 1
+fi
+
+convert "$1" "${1%.*}.jpg" && rm "$1"
