@@ -4,10 +4,10 @@
 # Need mp3gain installed.
 #
 
-[[ $# -ne 1 ]] && {
-  echo "audionormalize \<inputvideofile\>";
-  exit 3;
-}
+if [ $# -ne 1 ]; then
+  echo "vid-audio-normalize \<inputvideofile\>";
+  exit 1;
+fi
 
 tmpaudio="$(mktemp /tmp/tmp.XXXXXXXXXX.mp3)"
 tmpvideo="$(echo "$1" | sed 's/\.\([^.]*\)$/._tmp_.\1/')"
