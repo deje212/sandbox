@@ -5,13 +5,13 @@ if [ $# -ne 1 ]; then
 	exit 1;
 fi
 
-echo -e "Converting \"\e[1m$1\e[0m\" to PNG"
-
-gtype="%{1%*.}"
-gtype="%{gtype^^*}"
+gtype="${1%*.}"
+gtype="${gtype^^*}"
 if [ "$gtype" == "PNG" ]; then
-  echo "File '%1' is a PNG already."
+  echo "\e[1mError\e[0m: File '$1' is a PNG already."
   exit 1
 fi
+
+echo -e "Converting \"\e[1m$1\e[0m\" to PNG"
 
 convert "$1" "${1%.*}.png" && rm "$1"

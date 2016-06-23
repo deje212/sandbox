@@ -5,13 +5,13 @@ if [ $# -ne 1 ]; then
 	exit 1;
 fi
 
-echo -e "Converting \"\e[1m$1\e[0m\" to JPEG"
-
-gtype="%{1%*.}"
-gtype="%{gtype^^*}"
+gtype="${1#*.}"
+gtype="${gtype^^*}"
 if [ "$gtype" == "JPG" ] || [ "$gtype" == "JPEG" ]; then
-  echo "File '%1' is a JPEG already."
+  echo "\e[1mError\e[0m: File '$1' is a JPEG already."
   exit 1
 fi
+
+echo -e "Converting \"\e[1m$1\e[0m\" to JPEG"
 
 convert "$1" "${1%.*}.jpg" && rm "$1"
