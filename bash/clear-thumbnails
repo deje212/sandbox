@@ -1,3 +1,4 @@
 #!/bin/bash
 
-rm -rf ~/.thumbnails/*
+if [ -d ~/.thumbnails ]; then rm -rf ~/.thumbnails/*; fi
+if [ -d ~/.cache/thumbnails ]; then rm -rf ~/.cache/thumbnails/*; fi
