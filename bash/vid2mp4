@@ -44,6 +44,7 @@ elif [ ! -z "$ACODEC" ]; then
         fi 
       fi 
     fi
+  fi
 
   APARAMS="-c:a ac3 -b:a ${ABR}k -ac 2"
 else
