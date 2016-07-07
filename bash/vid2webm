@@ -10,13 +10,8 @@ FILENAME="$1"
 
 EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
-VBITRATE="`ffprobe "$1" 2>&1 | sed -n 's/^.\+: Video: .\+, \([0-9]\+\) kb\/s.*$/\1/p'`"
-if [ -z "$VBITRATE" ]; then
-  VBITRATE="`ffprobe "$1" 2>&1 | sed -n 's/^.*Duration: .*bitrate: \([0-9]\+\) kb\/s.*$/\1/p'`"
-fi
-
 # Usa preset do x264 com maior poder de análise.
-VPARAMS="-c:v libvpx -crf 10 -qmin 0 -qmax 23 -b:v ${VBITRATE}k -c:a libvorbis"
+VPARAMS="-c:v libvpx-vp9 -crf 13 -b:v 0 -lag-in-frames 25 -c:a libopus"
 
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.webm)"
 OFNAME="${FILENAME%.*}.webm"
