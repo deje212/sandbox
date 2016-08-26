@@ -55,9 +55,6 @@ fi
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.mp4)"
 OFNAME="${FILENAME%.*}.mp4"
 
-echo "FILENAME=\"$FILENAME\""
-echo "TMPFNAME=\"$TMPFNAME\""
-
 ffmpeg -y -i "$FILENAME" $VPARAMS $APARAMS $EXTRA_PARAMS $TMPFNAME && \
   rm "$FILENAME" && \
   mv "$TMPFNAME" "$OFNAME"
