@@ -1,0 +1,29 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# Cria template de módulo C e header de acordo com um nome.
+#
+# genctemplate <module-name>
+#
+
+import os
+import sys
+
+def create_templates(name):
+    file = open(name+".h", "wt")
+    symbol = "__" + name.upper() + "_INCLUDED__"
+    file.write("#ifndef " + symbol + "\n")
+    file.write("#define " + symbol + "\n")
+    file.write("\n#endif")
+    file.close()
+    file = open(name+".c", "wt")
+    file.write("#include \""+name+".h\"\n")
+    file.close()
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print "Error: Invalid command line.\nUsage: genctemplate <modulename>\n"
+        sys.exit()
+    name = sys.argv[1]
+    create_templates(name)
