@@ -1,0 +1,6 @@
+#ifndef __WINAPP_RESOURCES_INCLUDED__
+#define __WINAPP_RESOURCES_INCLUDED__
+
+#define ID_FILE_EXIT 1000
+
+#endif

@@ -1,0 +1,13 @@
+#include "winapp-resources.h"
+
+/* Winapp main icon */
+WINAPP_ICON ICON "winapp-base.ico"
+
+/* Simple menu. */
+MAIN_MENU MENU
+BEGIN
+  POPUP "&File"
+  BEGIN
+    MENUITEM "E&xit", ID_FILE_EXIT
+  END
+END
