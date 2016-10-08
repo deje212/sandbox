@@ -1,5 +1,5 @@
-CC = i586-mingw32msvc-cc
-RC = i586-mingw32msvc-windres
+CC = x86_64-w64-mingw32-gcc
+RC = x86_64-w64-mingw32-windres
 CFLAGS = -O3 
 
 winapp-base.exe: winapp-base.o winapp-baseres.o

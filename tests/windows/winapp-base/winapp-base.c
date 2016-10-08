@@ -13,20 +13,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 {
   MSG msg;
   static const char *className = "MyWinAppClass32";
-  WNDCLASS wc = {};
-
-  wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-  wc.lpfnWndProc = WindowMessageHandler;
-  wc.hInstance = hInstance;
-  wc.hIcon = LoadIcon(hInstance, "WINAPP_ICON");
-  wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-  wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-  wc.lpszClassName = className;
-  wc.lpszMenuName = "MAIN_MENU";
+  WNDCLASS wc = {
+    .style = CS_HREDRAW | CS_VREDRAW,
+    .lpfnWndProc = WindowMessageHandler,
+    .hInstance = hInstance,
+    .hIcon = LoadIcon(hInstance, "WINAPP_ICON"),
+    .hCursor = LoadCursor(NULL, IDC_ARROW),
+    .hbrBackground = (HBRUSH)(COLOR_WINDOW + 1),
+    .lpszClassName = className,
+    .lpszMenuName = "MAIN_MENU"
+  };
 
   RegisterClass(&wc);
 
-  if ((mainWindowHandle = CreateWindow(
+  if ((mainWindowHandle = CreateWindowEx(0,
                             className,
                             "My Win32 App",
                             WS_OVERLAPPEDWINDOW,
