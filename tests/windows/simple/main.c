@@ -9,7 +9,7 @@ int CALLBACK WinMain(HINSTANCE hInst,
                      LPSTR lpszCmdLine,
                      int nCmdShow)
 {
-  static LPCSTR szClassName = "Inches2CmWinAppClass";
+  static LPCSTR szClassName = "SimpleAppClass";
   HWND hWnd;
   MSG msg;
   WNDCLASS wc =
@@ -17,7 +17,7 @@ int CALLBACK WinMain(HINSTANCE hInst,
     .style = CS_HREDRAW | CS_VREDRAW,
     .lpfnWndProc = WndProc,
     .hInstance = hInst,
-    .hIcon = LoadIcon(NULL, "MAIN_ICON"),
+    .hIcon = LoadIcon(NULL, IDI_APPLICATION),
     .hCursor = LoadCursor(NULL, IDC_ARROW),
     .hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1),
     .lpszClassName = szClassName
@@ -53,10 +53,10 @@ int CALLBACK WinMain(HINSTANCE hInst,
 
   if (!(hWnd = CreateWindowEx(0,
                               szClassName,
-                              "Inches to centimeters App",
+                              "My Simple App",
                               WINDOW_STYLE,
                               CW_USEDEFAULT, CW_USEDEFAULT,
-                              320, 240,
+                              320, 100,
                               NULL, NULL,
                               hInst,
                               NULL)))
