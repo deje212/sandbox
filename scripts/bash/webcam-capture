@@ -1,0 +1,26 @@
+#!/bin/bash
+
+WEBCAM_RES="hd720"
+WEBCAM_FRAMERATE="7.5"
+WEBCAM_AUDIOCHANNELS=1
+AUDIO_BITRATE="64k"
+AUDIO_SAMPLERATE=44100
+OUTPUT_VIDEOTYPE="matroska"
+OUTPUT_VIDEO="output.mkv"
+
+ffmpeg -f v4l2 -s $WEBCAM_RES -i /dev/video0 -r $WEBCAM_FRAMERATE \
+-f pulse -ac $WEBCAM_AUDIOCHANNELS -i default \
+-c:v libx264 -preset ultrafast -b:v 3000k -pix_fmt yuv420p \
+-c:a aac -strict -2 -b:a $AUDIO_BITRATE -ar $AUDIO_SAMPLERATE \
+-f $OUTPUT_VIDEOTYPE "$OUTPUT_VIDEO"
+
+# Se quiser usar o ffmpeg como encoder para o Youtube,
+# mude as variáveis OUTPUT_VIDEOTYPE e OUTPUT_VIDEO para:
+#
+# OUTPUT_VIDEOTYPE="flv"
+# OUTPUT_VIDEO="rtmp://<rtmp-url/<stream-key>
+#
+# Esses dois parâmetros (rtmp-url e stream-key) são 
+# fornecidos no final da página do Youtube Live Stream, 
+# na sua conta.
+
