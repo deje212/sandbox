@@ -11,7 +11,7 @@ FILENAME="$1"
 EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
 # Usa preset do x264 com maior poder de análise.
-VPARAMS="-c:v libvpx-vp9 -crf 13 -b:v 0 -lag-in-frames 25 -c:a libopus -threads 2"
+VPARAMS="-c:v libvpx -crf 13 -b:v 0 -c:a libovorbis -threads 2"
 
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.webm)"
 OFNAME="${FILENAME%.*}.webm"
