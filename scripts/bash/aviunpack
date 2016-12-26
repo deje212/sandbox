@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "Usage: mp4unpack <videofile>"
+  exit 1
+fi
+
+ffmpeg -i "$1" -codec copy -bsf:v mpeg4_unpack_bframes "_$1" && rm "$1" && mv "_$1" "$1"
