@@ -5,7 +5,7 @@
 # Script para nautilus, mas pode ser usado manualmente.
 #
 
-FFMPEG_OPTIONS="-c:v libx264 -sameq -c:a ac3 -b:a 192k -ac 2 -map_metadata -1"
+FFMPEG_OPTIONS="-c:v libx264 -crf 20 -c:a ac3 -b:a 192k -ac 2 -map_metadata -1"
 
 # Parameters:
 #   $1 = original video
