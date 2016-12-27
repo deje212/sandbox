@@ -6,10 +6,6 @@ then
   exit 3
 fi
 
-VIDTIME="`ffprobe "$1" 2>&1 | sed -n 's/^.*Duration: \([0-9:.]\+\).*$/\1/p'`"
-HOURS=${VIDTIME:0:2}
-MINS=${VIDTIME:3:2}
-SECS=${VIDTIME:6}
-SECS="`echo "scale=2; $HOURS*3600+$MINS*60+$SECS" | bc`"
+VDUR="$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=nw=1:nk=1 "$1")"
 
-echo "\"$1\" ($VIDTIME - $SECS seconds)"
+echo "\"$1\" ($VDUR seconds)"

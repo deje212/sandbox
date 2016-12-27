@@ -16,11 +16,6 @@ fi
 
 EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
-VBITRATE="`ffprobe "$1" 2>&1 | sed -n 's/^.\+: Video: .\+, \([0-9]\+\) kb\/s.*$/\1/p'`"
-if [ -z "$VBITRATE" ]; then
-  VBITRATE="`ffprobe "$1" 2>&1 | sed -n 's/^.*Duration: .*bitrate: \([0-9]\+\) kb\/s.*$/\1/p'`"
-fi
-
 # Usa preset do x264 com maior poder de análise.
 VPARAMS="-qmin 0 -qmax 23"
 

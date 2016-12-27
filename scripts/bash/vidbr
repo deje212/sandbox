@@ -8,13 +8,19 @@ fi
 
 FILENAME=$1
 
-FILEBR="`ffprobe "$1" 2>&1 | sed -n 's/^.*Duration:.*bitrate: \([0-9]\+\) kb\/s.*$/\1/p'`"
-VIDBR="`ffprobe "$1" 2>&1 | sed -n 's/^.*Video:.* \([0-9]\+\) kb\/s.*$/\1/p'`"
-AUDBR="`ffprobe "$1" 2>&1 | sed -n 's/^.*Audio:.* \([0-9]\+\) kb\/s.*$/\1/p'`"
+VBR="$(ffprobe -v error -select_streams v:0 -show_entries stream=bit_rate -of default=nw=1:nk=1 "$1")"
+ABR="$(ffprobe -v error -select_streams a:0 -show_entries stream=bit_rate -of default=nw=1:nk=1 "$1")"
 
-FILEBR=${FILEBR:-'?'}
-VIDBR=${VIDBR:-'?'}
-AUDBR=${AUDBR:-'?'}
+VIDBR=${VBR:-'?'}
+AUDBR=${ABR:-'?'}
 
-echo "\"$1\" (total: $FILEBR kb/s, video: $VIDBR kb/s, audio: $AUDBR kb/s)"
+if [ "$VBR" != "?" ]; then
+  VBR=$((VBR/1000));
+fi
+
+if [ "$ABR" != "?" ]; then
+  ABR=$((ABR/1000))
+fi
+
+echo "\"$1\" (video: $VBR kb/s, audio: $ABR kb/s)"
 
