@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  cat << EOF
+Usage: calc_vbr <videofile>
+
+Calculates the appropriate video bitrate for an specific
+desired file dize.
+EOF
+  exit 1
+fi
+
+duration="`ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=nk=1:nw=1 "$1"`"
+abr="`ffprobe -v error -select_streams a:0 -show_entries stream=bit_rate -of default=nk=1:nw=1 "$1"`"
+if [ -z "$abr" ]; then abr=0; fi
+abr=$((abr/1000))
+
+read -p 'Qual é o tamanho do arquivo desejado (em KiB): ' desired_filesize
+
+vbr="`echo "(($desired_filesize * 8) / $duration) - $abr" | bc`"
+
+echo -e "$1\n(vbr=\e[1m$vbr\e[0m kbps for $desired_filesize KiB file & abr=$abr kbps)"
+
+
+
