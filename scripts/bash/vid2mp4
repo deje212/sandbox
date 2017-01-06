@@ -33,7 +33,7 @@ elif [ ! -z "$ACODEC" ]; then
     echo -e "\e[1mWarning\e[0m: Cannot find audio bitrate. Using 128 kbps!"
     ABR=128
   else
-    ABR="`echo "$ABR / 1000" | bc`"
+    ABR=$((ABR/1000))
 
     if [ $ABR -le 64 ]; then ABR=64; else
       if [ $ABR -lt 96 ]; then ABR=64; else
