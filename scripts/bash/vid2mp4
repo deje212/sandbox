@@ -1,5 +1,9 @@
 #!/bin/bash
 
+number() {
+  grep -E [0-9]+$ "$1"
+}
+
 if [ $# -ne 1 ]; then 
 	echo -e "\e[1mUsage\e[0m: vid2mp4 <inputvideo>"; 
 	exit 3; 
@@ -28,29 +32,24 @@ if [ "$ACODEC" == "ac3" ]; then
 elif [ ! -z "$ACODEC" ]; then
   # Pega o bitrate de audio.
 
-  ABR="$(ffprobe -v error -select_streams a:0 -show_entries stream=bit_rate -of default=nw=1:nk=1 "$1")"
+  ABR="$(number "`ffprobe -v error -select_streams a:0 -show_entries stream=bit_rate -of default=nw=1:nk=1 "$1"`")"
 
-  case $ABR in
-    # Se ABR for numérica...
-    [0-9]*)
-      ABR=$(($ABR / 1000))
-      if [ $ABR -le 64 ]; then ABR=64; else
-        if [ $ABR -lt 96 ]; then ABR=96; else
-          if [ $ABR -lt 128 ]; then ABR=128; else
-            if [ $ABR -lt 160 ]; then ABR=160; else
-                ABR=192; 
-            fi 
+  if [ ! -z "$ABR" ]; then
+    ABR=$(($ABR / 1000))
+    if [ $ABR -le 64 ]; then ABR=64; else
+      if [ $ABR -lt 96 ]; then ABR=96; else
+        if [ $ABR -lt 128 ]; then ABR=128; else
+          if [ $ABR -lt 160 ]; then ABR=160; else
+            ABR=192; 
           fi 
         fi 
-      fi
-      ;;
-
+      fi 
+    fi
+  else
     # ... mas, se não for, usa 128k.
-    *)
-      echo -e "\e[1mWarning\e[0m: Cannot find audio bitrate. Using 128 kbps!"
-      ABR=128
-      ;;
-  esac
+    echo -e "\e[1mWarning\e[0m: Cannot find audio bitrate. Using 128 kbps!"
+    ABR=128
+  fi
 
   APARAMS="-c:a ac3 -b:a ${ABR}k -ac 2"
 else
