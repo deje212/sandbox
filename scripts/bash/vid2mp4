@@ -1,7 +1,7 @@
 #!/bin/bash
 
 number() {
-  grep -E [0-9]+$ "$1"
+  echo "$1" | grep -E [0-9]+$
 }
 
 if [ $# -ne 1 ]; then 

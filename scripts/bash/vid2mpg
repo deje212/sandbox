@@ -16,8 +16,7 @@ fi
 
 EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
 
-# Usa preset do x264 com maior poder de análise.
-VPARAMS="-qmin 0 -qmax 23"
+VPARAMS="-crf 20"
 
 TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.mpg)"
 OFNAME="${FILENAME%.*}.mpg"
