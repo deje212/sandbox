@@ -1,9 +1,5 @@
 #!/bin/bash
 
-number() {
-  echo "$1" | grep -E ^[0-9]+$
-}
-
 if [ $# -ne 1 ]; then 
 	echo -e "\e[1mUsage\e[0m: vid2mp4 <inputvideo>"; 
 	exit 3; 
@@ -34,7 +30,8 @@ elif [ ! -z "$ACODEC" ]; then
 
   ABR="$(number "`ffprobe -v error -select_streams a:0 -show_entries stream=bit_rate -of default=nw=1:nk=1 "$1"`")"
 
-  if [ ! -z "$ABR" ]; then
+  # Se $ABR for inteiro...
+  if [[ "$ABR" =~ ^[0-9]+$ ]]; then
     ABR=$(($ABR / 1000))
     if [ $ABR -le 64 ]; then ABR=64; else
       if [ $ABR -lt 96 ]; then ABR=96; else
