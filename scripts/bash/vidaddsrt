@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then 
+	echo -e "\e[1mUsage\e[0m: vidaddsrt4 <inputvideo> <inputsrt> <lang>"; 
+  echo "Where <lang> is 'por', 'eng' or something like that."
+  echo "Is ommited 'por' is assumed."
+	exit 1; 
+fi
+
+LANG="$3"
+if [ -z "$3" ]; then
+  LANG="por"
+fi
+
+MP4Box "$1" -add "$2";lang=$3

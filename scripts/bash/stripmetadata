@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo -e "\e[1mUsage\e[0m: stripmetadata <audiofile-name>";
+  exit 1;
+fi
+
+EXT="${1#*.}"
+TMPFILE="$(mktemp /tmp/tmp_XXXXXXXXXX.$EXT)"
+
+ffmpeg -y -hide_banner -i "$1" -c copy -map v -map a -map_metadata -1 "$TMPFILE" && \
+  rm "$1" && \
+  mv "$TMPFILE" "$1"
