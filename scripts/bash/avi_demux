@@ -1,0 +1,17 @@
+#!/bin/bash
+
+[ $# -ne 1 ] && { 
+	echo "Usage: avi_demux <inputvideo>"; 
+	exit 3; 
+}
+
+EXTRA_PARAMS="-map_metadata -1" # Retira metadados do vídeo destino.
+
+TMPFNAME="$(mktemp /tmp/tmp_XXXXXXXXXX.avi)"
+
+ffmpeg -y -i "$1" -c copy -bsf mpeg4_unpack_bframes "$TMPFNAME" && \
+  rm "$1" && \
+  mv "$TMPFNAME" "$1"
+
+unset TMPFNAME
+
